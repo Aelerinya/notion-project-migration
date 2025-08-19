@@ -6,7 +6,7 @@ type Props = {
 	token?: string;
 };
 
-type Step = 'init' | 'created' | 'await-manual-move' | 'verifying' | 'moved' | 'confirm-update' | 'updating' | 'complete' | 'error';
+type Step = 'init' | 'created' | 'saving-relations' | 'await-manual-move' | 'verifying' | 'moved' | 'confirm-update' | 'updating' | 'complete' | 'error';
 
 export default function MigrateTest({token}: Props) {
 	const [step, setStep] = useState<Step>('init');
@@ -46,10 +46,30 @@ export default function MigrateTest({token}: Props) {
 
 			setTaskId(result.taskId || null);
 			setTaskUrl(result.taskUrl || null);
-			// Store the create response if available (we need to modify the service to return it)
 			setStep('created');
 		} catch (error: any) {
 			setError(`Failed to create test task: ${error.message || 'Unknown error'}`);
+			setStep('error');
+		}
+	};
+
+	const saveProjectsRelation = async () => {
+		if (!service || !taskId) return;
+
+		setStep('saving-relations');
+
+		try {
+			const result = await service.saveProjectsRelationBeforeMove(taskId);
+			
+			if (!result.success) {
+				setError(result.error || 'Failed to save projects relation');
+				setStep('error');
+				return;
+			}
+
+			setStep('await-manual-move');
+		} catch (error: any) {
+			setError(`Failed to save projects relation: ${error.message || 'Unknown error'}`);
 			setStep('error');
 		}
 	};
@@ -102,7 +122,7 @@ export default function MigrateTest({token}: Props) {
 
 	useInput((input, key) => {
 		if (step === 'created' && (input === 'y' || input === 'Y')) {
-			setStep('await-manual-move');
+			saveProjectsRelation();
 		} else if (step === 'created' && (input === 'n' || input === 'N')) {
 			setStep('complete');
 		} else if (step === 'await-manual-move' && (input === 'c' || input === 'C')) {
@@ -158,8 +178,16 @@ export default function MigrateTest({token}: Props) {
 				</Box>
 
 				<Box marginTop={1}>
-					<Text color="green">Do you want to proceed with the manual move step? (y/n): </Text>
+					<Text color="green">Do you want to proceed with saving parent projects and manual move? (y/n): </Text>
 				</Box>
+			</Box>
+		);
+	}
+
+	if (step === 'saving-relations') {
+		return (
+			<Box>
+				<Text>Saving parent project connections before move...</Text>
 			</Box>
 		);
 	}
@@ -262,6 +290,7 @@ export default function MigrateTest({token}: Props) {
 						<Text color="gray">• In charge → Owner (if single person)</Text>
 						<Text color="gray">• Deadline → Start and end dates</Text>
 						<Text color="gray">• Status: Done → Completed</Text>
+						<Text color="gray">• Parent projects restored from saved data</Text>
 					</Box>
 				)}
 

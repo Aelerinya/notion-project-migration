@@ -165,6 +165,65 @@ export class NotionService {
 		}
 	}
 
+	async saveProjectsRelationBeforeMove(taskId: string): Promise<{success: boolean; error?: string}> {
+		if (!this.client) {
+			return {
+				success: false,
+				error: 'No Notion client initialized',
+			};
+		}
+
+		try {
+			// Get current task properties to extract Projects relation
+			const currentTask = await this.client.pages.retrieve({ page_id: taskId });
+			const currentProps = (currentTask as any).properties;
+
+			// Check if there's a Projects relation to save
+			if (currentProps.Projects?.relation && currentProps.Projects.relation.length > 0) {
+				const projectIds = currentProps.Projects.relation.map((rel: any) => rel.id);
+				const projectLinksText = projectIds.map((id: string) => `https://www.notion.so/${id.replace(/-/g, '')}`).join(', ');
+
+				console.log(`✓ Saving ${projectIds.length} project relation(s) to 'Parent projects to transfer' field`);
+
+				// Save the project links to "Parent projects to transfer" field
+				await this.client.pages.update({
+					page_id: taskId,
+					properties: {
+						'Parent projects to transfer': {
+							rich_text: [
+								{
+									text: {
+										content: `${projectLinksText}`,
+									},
+								},
+							],
+						},
+					},
+				});
+
+				return { success: true };
+			} else {
+				console.log('ℹ No Projects relation found to save');
+				return { success: true };
+			}
+
+		} catch (error: any) {
+			console.error('Save projects relation error:', error);
+			let errorMessage = 'Failed to save projects relation';
+			
+			if (error?.code === 'unauthorized') {
+				errorMessage = 'Invalid API token or insufficient permissions';
+			} else if (error?.message) {
+				errorMessage = `${error.code || 'Error'}: ${error.message}`;
+			}
+
+			return {
+				success: false,
+				error: errorMessage,
+			};
+		}
+	}
+
 	async createTestTask(): Promise<{success: boolean; error?: string; taskId?: string; taskUrl?: string}> {
 		if (!this.client) {
 			return {
@@ -400,6 +459,39 @@ export class NotionService {
 				updatedProperties['Start and end dates (approximate)'] = {
 					date: currentProps.Deadline.date
 				};
+			}
+
+			// Restore parent project connections from "Parent projects to transfer"
+			if (currentProps['Parent projects to transfer']?.rich_text?.[0]?.text?.content) {
+				const transferText = currentProps['Parent projects to transfer'].rich_text[0].text.content;
+				
+				// Extract project IDs from URLs in the transfer text
+				const urlMatches = transferText.match(/https:\/\/www\.notion\.so\/([a-f0-9]{32})/g);
+				if (urlMatches) {
+					const parentProjectIds = urlMatches.map((url: string) => {
+						const id = url.match(/([a-f0-9]{32})$/)?.[1];
+						// Convert back to UUID format with hyphens
+						return id ? `${id.slice(0, 8)}-${id.slice(8, 12)}-${id.slice(12, 16)}-${id.slice(16, 20)}-${id.slice(20)}` : null;
+					}).filter(Boolean) as string[];
+
+					if (parentProjectIds.length > 0) {
+						console.log(`✓ Restoring ${parentProjectIds.length} parent project connection(s)`);
+						updatedProperties['Parent item'] = {
+							relation: parentProjectIds.map((id: string) => ({ id }))
+						};
+
+						// Clear the transfer field after restoring connections
+						updatedProperties['à transférer (to delete)'] = {
+							rich_text: [
+								{
+									text: {
+										content: `Transferred parent projects: ${parentProjectIds.length} connections restored`,
+									},
+								},
+							],
+						};
+					}
+				}
 			}
 
 			console.log('✓ Updating properties for Projects DB');

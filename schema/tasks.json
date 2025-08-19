@@ -20,7 +20,7 @@
     "object": "user",
     "id": "9494ea4b-765a-4eac-9cc2-39feef9c4bb7"
   },
-  "last_edited_time": "2025-08-19T09:22:00.000Z",
+  "last_edited_time": "2025-08-19T13:05:00.000Z",
   "title": [
     {
       "type": "text",
@@ -480,6 +480,12 @@
       "type": "last_edited_time",
       "last_edited_time": {}
     },
+    "Parent projects to transfer": {
+      "id": "qZ%60j",
+      "name": "Parent projects to transfer",
+      "type": "rich_text",
+      "rich_text": {}
+    },
     "Statut éditorial": {
       "id": "sgkd",
       "name": "Statut éditorial",
@@ -608,5 +614,5 @@
   "public_url": null,
   "archived": false,
   "in_trash": false,
-  "request_id": "34ef3e0c-6f02-4526-a667-bff29199ba8b"
+  "request_id": "7ebe3788-b464-4a76-804d-bb3a51f4a7b8"
 }
