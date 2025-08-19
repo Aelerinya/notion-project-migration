@@ -109,3 +109,135 @@ These properties exist only in Projects database:
    - `Done` → `Completed`
    - `Cancelled` → `Cancelled` (unchanged)
 6. **Manual Review**: Complex mappings may require manual review
+
+## Migration Process Steps
+
+The migration follows a structured step-by-step process with validation, user prompts, and automatic operations:
+
+### Step 1: Initialization (`init`)
+**Purpose**: Create test data and initialize migration process
+**Type**: Automatic
+**Operations**:
+- Creates a test project in Tasks database with properties:
+  - Name: "Test Migration Project - [timestamp]"
+  - Task/project/activity: "Project" 
+  - Status: "Done"
+  - Duration, Cost, Team, etc. (sample values)
+- Creates a test subtask that references the project via "Parent item" relation
+- Validates the created project meets migration requirements
+
+**Validation Checks**:
+- Project type must be "Project" (Task/project/activity = "Project")
+- Project must have no Parent item (root-level project only)
+- Project subtask relation must not have `has_more: true` (pagination limit check)
+
+### Step 2: Project Created Confirmation (`created`)
+**Purpose**: Display created test data and get user confirmation
+**Type**: User prompt
+**Display**: Shows created project and subtask details with URLs
+**User Options**:
+- `Y`: Continue with migration → proceeds to `saving-relations`
+- `N`: Cancel migration → jumps to `complete`
+
+### Step 3: Save Parent Relations (`saving-relations`)
+**Purpose**: Preserve existing project relationships before migration  
+**Type**: Automatic
+**Operations**:
+- Reads current "Projects" relation from the task
+- Saves project URLs to "Parent projects to transfer" field for later restoration
+- Handles cases where no Projects relation exists
+
+### Step 4: Handle Subtask Connections (`handling-subtasks`)
+**Purpose**: Prepare subtask relationships for migration
+**Type**: Automatic
+**Operations**:
+- Reads all subtasks from project's "Subtask" relation property
+- Stores comma-separated subtask IDs in "Subtasks to transfer" field
+- **Clears the "Subtask" relation** (sets to empty array) to prevent auto-migration of subtasks
+- This ensures subtasks stay in Tasks database while project moves to Projects database
+
+**Validation Checks**:
+- Aborts if `has_more: true` in subtask relation (too many subtasks for API pagination)
+- Provides clear error message directing user to reduce subtasks before migration
+
+### Step 5: Manual Database Move (`await-manual-move`)
+**Purpose**: Instruct user to manually move page between databases
+**Type**: User instruction + prompt
+**Instructions**: 
+- User must manually drag the project page from Tasks database to Projects database in Notion UI
+- Provides the project URL for easy access
+**User Options**:
+- `C`: Continue to verification → proceeds to `verifying`
+
+### Step 6: Verify Database Move (`verifying`)
+**Purpose**: Confirm the page was successfully moved to Projects database
+**Type**: Automatic
+**Operations**:
+- Retrieves the page and checks its parent database ID
+- Compares against expected Projects database ID
+- **Success**: Page is in Projects database → proceeds to `moved`
+- **Failure**: Page still in wrong database → returns to `await-manual-move`
+
+### Step 7: Move Confirmed (`moved`)
+**Purpose**: Confirm successful move and offer property updates
+**Type**: User prompt
+**Display**: Shows the moved page URL and confirms successful database transfer
+**User Options**:
+- `Y`: Update properties for Projects database → proceeds to `updating`
+- `N`: Skip property updates → jumps to `complete`
+
+### Step 8: Update Properties (`updating`)
+**Purpose**: Transform properties for Projects database schema
+**Type**: Automatic
+**Property Transformations**:
+- **Status mapping**: "Done" → "Completed", "Cancelled" → "Cancelled"  
+- **Property renames**:
+  - "Task/project/activity" → "Type"
+  - "Importance" → "Impact" 
+  - "Comments & updates" → "Comments"
+  - "In charge" → "Owner" (only if single person)
+  - "Deadline" → "Start and end dates (approximate)"
+- **Parent project restoration**: Reads "Parent projects to transfer" field and restores connections to "Parent item" relation
+- **Transfer field cleanup**: Moves transfer data to "à transférer (to delete)" field with completion timestamp
+- **Subtask connection restoration**: Calls `restoreSubtaskConnections()` to re-link subtasks to moved project
+
+**Subtask Restoration Process**:
+- Reads "Subtasks to transfer" field with stored subtask IDs
+- For each subtask ID, adds the new project ID to the subtask's "Projects" relation
+- Avoids duplicate connections
+- Clears "Subtasks to transfer" field after processing
+- **Critical**: If subtask restoration fails, entire migration is marked as failed
+
+### Step 9: Migration Complete (`complete`)
+**Purpose**: Display final results and completion status
+**Type**: Display + exit prompt
+**Display**: 
+- Shows final migrated page URL
+- Displays property update results
+- Shows completion status
+**User Options**:
+- `Enter` or `Q`: Exit application
+
+### Step 10: Error Handling (`error`)
+**Purpose**: Display errors and allow user to exit
+**Type**: Display + exit prompt
+**Display**: Shows error message with details
+**User Options**:
+- `Enter` or `Q`: Exit application
+
+## Migration Flow Summary
+
+```
+init → created → [Y] → saving-relations → handling-subtasks → await-manual-move → [C] → verifying → moved → [Y] → updating → complete
+  ↓       ↓                                                                                        ↓       ↓
+error   [N] → complete                                                                          [N] → complete
+```
+
+## Key Safety Features
+
+1. **Validation First**: Projects are validated before any changes are made
+2. **Subtask Protection**: Subtask relations are cleared to prevent accidental migration
+3. **Relationship Preservation**: Parent projects and subtasks are tracked and restored
+4. **Atomic Operations**: Failed subtask restoration causes entire migration to fail
+5. **User Control**: Manual database move ensures user oversight of the critical step
+6. **Rollback Information**: Transfer fields preserve original relationship data
