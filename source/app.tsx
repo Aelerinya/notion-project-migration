@@ -1,15 +1,32 @@
 import React from 'react';
 import {Text, Box} from 'ink';
 import TestConnection from './test-connection.js';
+import Schema from './schema.js';
+import MigrateTest from './migrate-test.js';
+import ListUsers from './list-users.js';
 
 type Props = {
 	command?: string;
+	subcommand?: string;
 	token?: string;
+	json?: boolean;
 };
 
-export default function App({command, token}: Props) {
+export default function App({command, subcommand, token, json}: Props) {
 	if (command === 'test-connection') {
 		return <TestConnection token={token} />;
+	}
+
+	if (command === 'schema') {
+		return <Schema subcommand={subcommand} token={token} json={json} />;
+	}
+
+	if (command === 'migrate-test') {
+		return <MigrateTest token={token} />;
+	}
+
+	if (command === 'list-users') {
+		return <ListUsers token={token} />;
 	}
 
 	if (!command) {

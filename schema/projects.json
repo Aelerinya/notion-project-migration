@@ -1,0 +1,659 @@
+{
+  "object": "database",
+  "id": "1b966ef0-2bab-80cc-9e51-d8a48308b4fe",
+  "cover": null,
+  "icon": {
+    "type": "external",
+    "external": {
+      "url": "https://www.notion.so/icons/map_yellow.svg"
+    }
+  },
+  "created_time": "2025-03-17T23:16:00.000Z",
+  "created_by": {
+    "object": "user",
+    "id": "104d872b-594c-8145-9f25-0002faad370e"
+  },
+  "last_edited_by": {
+    "object": "user",
+    "id": "9494ea4b-765a-4eac-9cc2-39feef9c4bb7"
+  },
+  "last_edited_time": "2025-08-19T09:22:00.000Z",
+  "title": [
+    {
+      "type": "text",
+      "text": {
+        "content": "Projects ",
+        "link": null
+      },
+      "annotations": {
+        "bold": false,
+        "italic": false,
+        "strikethrough": false,
+        "underline": false,
+        "code": false,
+        "color": "default"
+      },
+      "plain_text": "Projects ",
+      "href": null
+    }
+  ],
+  "description": [],
+  "is_inline": false,
+  "properties": {
+    "Owner": {
+      "id": "AHRA",
+      "name": "Owner",
+      "type": "people",
+      "people": {}
+    },
+    "Supervisor": {
+      "id": "HXh%3B",
+      "name": "Supervisor",
+      "type": "people",
+      "people": {}
+    },
+    "Status": {
+      "id": "IUpw",
+      "name": "Status",
+      "type": "status",
+      "status": {
+        "options": [
+          {
+            "id": "rbd?",
+            "name": "Done",
+            "color": "gray",
+            "description": null
+          },
+          {
+            "id": "_<gb",
+            "name": "To be proofread",
+            "color": "gray",
+            "description": null
+          },
+          {
+            "id": "WQYZ",
+            "name": "Project Pitch",
+            "color": "yellow",
+            "description": null
+          },
+          {
+            "id": "a866a766-f54c-4534-a018-591044b6d535",
+            "name": "Validated - Not started",
+            "color": "brown",
+            "description": null
+          },
+          {
+            "id": "ltxV",
+            "name": "Coming",
+            "color": "gray",
+            "description": null
+          },
+          {
+            "id": "puQY",
+            "name": "Ongoing",
+            "color": "blue",
+            "description": null
+          },
+          {
+            "id": ";SNO",
+            "name": "Recurrent (for activities)",
+            "color": "purple",
+            "description": null
+          },
+          {
+            "id": "AO<u",
+            "name": "Completed",
+            "color": "green",
+            "description": null
+          },
+          {
+            "id": "w>x>",
+            "name": "Cancelled",
+            "color": "gray",
+            "description": null
+          }
+        ],
+        "groups": [
+          {
+            "id": "121c9779-f6e8-48f2-9fe6-5c6677eafab6",
+            "name": "To-do",
+            "color": "gray",
+            "option_ids": [
+              "rbd?",
+              "_<gb",
+              "WQYZ",
+              "a866a766-f54c-4534-a018-591044b6d535",
+              "ltxV"
+            ]
+          },
+          {
+            "id": "bc9eb6b8-c52c-4e88-aebb-d9124e5f7652",
+            "name": "In progress",
+            "color": "blue",
+            "option_ids": [
+              "puQY",
+              ";SNO"
+            ]
+          },
+          {
+            "id": "cf64e3b5-21ee-4546-ba6d-ae249d162946",
+            "name": "Complete",
+            "color": "green",
+            "option_ids": [
+              "AO<u",
+              "w>x>"
+            ]
+          }
+        ]
+      }
+    },
+    "Tasks": {
+      "id": "KpNf",
+      "name": "Tasks",
+      "description": "",
+      "type": "relation",
+      "relation": {
+        "database_id": "f22a6d02-e2d0-4c6c-ae8b-20818cedd576",
+        "type": "dual_property",
+        "dual_property": {
+          "synced_property_name": "Projects",
+          "synced_property_id": "yzNl"
+        }
+      }
+    },
+    "Workstream": {
+      "id": "W%5EjS",
+      "name": "Workstream",
+      "description": "Choose primary workstream",
+      "type": "select",
+      "select": {
+        "options": [
+          {
+            "id": "?XrV",
+            "name": "Comms",
+            "color": "pink",
+            "description": null
+          },
+          {
+            "id": "G=F=",
+            "name": "Operations",
+            "color": "yellow",
+            "description": null
+          },
+          {
+            "id": "kd~w",
+            "name": "Advocacy",
+            "color": "blue",
+            "description": null
+          },
+          {
+            "id": "lucF",
+            "name": "Events",
+            "color": "default",
+            "description": null
+          },
+          {
+            "id": "HmTK",
+            "name": "Analysis",
+            "color": "orange",
+            "description": null
+          }
+        ]
+      }
+    },
+    "Sub-item": {
+      "id": "X%5D%60l",
+      "name": "Sub-item",
+      "type": "relation",
+      "relation": {
+        "database_id": "1b966ef0-2bab-80cc-9e51-d8a48308b4fe",
+        "type": "dual_property",
+        "dual_property": {
+          "synced_property_name": "Parent item",
+          "synced_property_id": "uY%7CJ"
+        }
+      }
+    },
+    "Participants": {
+      "id": "YX%5CM",
+      "name": "Participants",
+      "type": "people",
+      "people": {}
+    },
+    "Master google doc": {
+      "id": "%5DFz%5D",
+      "name": "Master google doc",
+      "description": "Master doc (all other docs related to this project must be tabs in this one or linked from this one).",
+      "type": "url",
+      "url": {}
+    },
+    "Progress to end date": {
+      "id": "d%7CKS",
+      "name": "Progress to end date",
+      "type": "formula",
+      "formula": {
+        "expression": "if(dateBetween(dateEnd({{notion:block_property:iUlw:00000000-0000-0000-0000-000000000000:76ff8bc7-a796-4bf1-aeee-7893120f72eb}}), dateStart({{notion:block_property:iUlw:00000000-0000-0000-0000-000000000000:76ff8bc7-a796-4bf1-aeee-7893120f72eb}}), \"days\") == 0, 0, round(100 * dateBetween(now(), dateStart({{notion:block_property:iUlw:00000000-0000-0000-0000-000000000000:76ff8bc7-a796-4bf1-aeee-7893120f72eb}}), \"days\") / dateBetween(dateEnd({{notion:block_property:iUlw:00000000-0000-0000-0000-000000000000:76ff8bc7-a796-4bf1-aeee-7893120f72eb}}), dateStart({{notion:block_property:iUlw:00000000-0000-0000-0000-000000000000:76ff8bc7-a796-4bf1-aeee-7893120f72eb}}), \"days\")))/100"
+      }
+    },
+    "Last edited time": {
+      "id": "e%3Fv%5E",
+      "name": "Last edited time",
+      "type": "last_edited_time",
+      "last_edited_time": {}
+    },
+    "Type": {
+      "id": "iEiw",
+      "name": "Type",
+      "type": "select",
+      "select": {
+        "options": [
+          {
+            "id": "51d4aecc-94ee-44a7-94e9-5225f70f2bb1",
+            "name": "Project",
+            "color": "blue",
+            "description": null
+          },
+          {
+            "id": "0042a608-f406-4730-b9d5-8e6ac9189a2c",
+            "name": "Activity",
+            "color": "default",
+            "description": null
+          }
+        ]
+      }
+    },
+    "Start and end dates (approximate)": {
+      "id": "iUlw",
+      "name": "Start and end dates (approximate)",
+      "description": "Add start and end date.",
+      "type": "date",
+      "date": {}
+    },
+    "Parent item": {
+      "id": "uY%7CJ",
+      "name": "Parent item",
+      "type": "relation",
+      "relation": {
+        "database_id": "1b966ef0-2bab-80cc-9e51-d8a48308b4fe",
+        "type": "dual_property",
+        "dual_property": {
+          "synced_property_name": "Sub-item",
+          "synced_property_id": "X%5D%60l"
+        }
+      }
+    },
+    "Name": {
+      "id": "title",
+      "name": "Name",
+      "type": "title",
+      "title": {}
+    },
+    "Event": {
+      "id": "164563dc-dd05-4905-b154-cff69479691a",
+      "name": "Event",
+      "type": "checkbox",
+      "checkbox": {}
+    },
+    "In charge": {
+      "id": "227c3185-1dec-4f4b-bb0f-22b5e8160226",
+      "name": "In charge",
+      "description": "The person responsible for making sure this gets done. Usually it's also the person doing the thing.",
+      "type": "people",
+      "people": {}
+    },
+    "History": {
+      "id": "23e622cd-3867-49e6-a112-f28a4f709901",
+      "name": "History",
+      "description": "Reviews of all the previous months",
+      "type": "rich_text",
+      "rich_text": {}
+    },
+    "Scheduled for": {
+      "id": "2b1c1026-909b-4532-9fb8-725b8ac34ac0",
+      "name": "Scheduled for",
+      "description": "When you plan on doing the thing (this isn't the deadline).",
+      "type": "date",
+      "date": {}
+    },
+    "Duration (h)": {
+      "id": "2fd3343a-9f1f-4c52-a65f-a49da5625b14",
+      "name": "Duration (h)",
+      "type": "number",
+      "number": {
+        "format": "number"
+      }
+    },
+    "à transférer (to delete)": {
+      "id": "33c45cf9-2411-4ea8-b8df-f2396757018b",
+      "name": "à transférer (to delete)",
+      "type": "rich_text",
+      "rich_text": {}
+    },
+    "Impact": {
+      "id": "44e6365f-1828-4a00-aada-ad86985276fa",
+      "name": "Impact",
+      "description": "How impactful the task is, how much it's worth doing. This helps prioritize things during you planning sessions - You can also use this to fix the Value (example 3 stars = 10^3 euros in the final value column). Since CeSIA is worth 1M, this is 100 4 star projets.",
+      "type": "select",
+      "select": {
+        "options": [
+          {
+            "id": "FLVa",
+            "name": "⭐",
+            "color": "gray",
+            "description": null
+          },
+          {
+            "id": "m@qZ",
+            "name": "⭐⭐",
+            "color": "red",
+            "description": null
+          },
+          {
+            "id": "]n?B",
+            "name": "⭐⭐⭐",
+            "color": "yellow",
+            "description": null
+          },
+          {
+            "id": "=FFC",
+            "name": "⭐⭐⭐⭐",
+            "color": "blue",
+            "description": null
+          },
+          {
+            "id": "\\>g}",
+            "name": "⭐⭐⭐⭐⭐",
+            "color": "pink",
+            "description": null
+          }
+        ]
+      }
+    },
+    "Start and end dates (approximate possible)": {
+      "id": "48053027-b77c-4977-9998-c5ed2d843167",
+      "name": "Start and end dates (approximate possible)",
+      "description": "You will get a notification when a deadline has passed.",
+      "type": "date",
+      "date": {}
+    },
+    "€ Explanation": {
+      "id": "544da9a0-a480-4e68-aa15-d1b5e7391007",
+      "name": "€ Explanation",
+      "description": "Explainer of how the value was determined.",
+      "type": "rich_text",
+      "rich_text": {}
+    },
+    "Task/project/activity": {
+      "id": "5fdf6b13-625c-438f-a6ba-695187a42ceb",
+      "name": "Task/project/activity",
+      "type": "select",
+      "select": {
+        "options": [
+          {
+            "id": "vxI]",
+            "name": "Activity",
+            "color": "pink",
+            "description": null
+          },
+          {
+            "id": "FxsZ",
+            "name": "Project",
+            "color": "orange",
+            "description": null
+          },
+          {
+            "id": "peDW",
+            "name": "Task",
+            "color": "green",
+            "description": null
+          }
+        ]
+      }
+    },
+    "Volunteers needed": {
+      "id": "73f009e6-b041-4f8a-ac60-a421d4d24f81",
+      "name": "Volunteers needed",
+      "description": "If you need volunteers for projects or activity",
+      "type": "checkbox",
+      "checkbox": {}
+    },
+    "Type of publication": {
+      "id": "7bfb05f2-8eef-4647-b5c7-a81c4785f484",
+      "name": "Type of publication",
+      "description": "Only for the CeSIA",
+      "type": "multi_select",
+      "multi_select": {
+        "options": [
+          {
+            "id": "a>kg",
+            "name": "Tweet",
+            "color": "pink",
+            "description": null
+          },
+          {
+            "id": ";\\;b",
+            "name": "Website",
+            "color": "purple",
+            "description": null
+          },
+          {
+            "id": "|LqA",
+            "name": "Rapport",
+            "color": "green",
+            "description": null
+          },
+          {
+            "id": "|kTe",
+            "name": "Vidéos",
+            "color": "red",
+            "description": null
+          },
+          {
+            "id": "ZNWe",
+            "name": "Blog post / CP",
+            "color": "yellow",
+            "description": null
+          },
+          {
+            "id": "A_iq",
+            "name": "LinkedIn post",
+            "color": "blue",
+            "description": null
+          },
+          {
+            "id": "bcf87383-8878-463d-83b0-92c1cbd4e112",
+            "name": "Mémo",
+            "color": "orange",
+            "description": null
+          },
+          {
+            "id": "d3f65947-0cc3-4736-aee9-867c0de1ca9c",
+            "name": "Autre (tribune etc)",
+            "color": "default",
+            "description": null
+          }
+        ]
+      }
+    },
+    "V explanation": {
+      "id": "7cfee8f2-e268-4a93-bc2e-6147eb60890c",
+      "name": "V explanation",
+      "description": "A little summary of how the value was determined. This should include little calculations.",
+      "type": "rich_text",
+      "rich_text": {}
+    },
+    "Bénévoles dans l'équipe ": {
+      "id": "7e8dfcb1-aaae-41d8-bed0-45a68b82ab83",
+      "name": "Bénévoles dans l'équipe ",
+      "description": "À cocher si des bénévoles sont dans l'équipe du projet/activité",
+      "type": "checkbox",
+      "checkbox": {}
+    },
+    "V override (k€)": {
+      "id": "7f63372b-03df-4b71-82c3-e403a0fbe922",
+      "name": "V override (k€)",
+      "description": "Use this if you prefer to give a direct value instead of using a % of the parent project",
+      "type": "number",
+      "number": {
+        "format": "number"
+      }
+    },
+    "% V project": {
+      "id": "8617c744-ae00-4fa5-928f-4bf9ed189f3d",
+      "name": "% V project",
+      "description": "% of the project's value",
+      "type": "number",
+      "number": {
+        "format": "number"
+      }
+    },
+    "Milestone": {
+      "id": "89f1bbba-f472-48f0-869a-317c6b1ed2b1",
+      "name": "Milestone",
+      "description": "For key project milestones. Used as a test for the projects database",
+      "type": "select",
+      "select": {
+        "options": [
+          {
+            "id": "cpTd",
+            "name": "Milestones",
+            "color": "pink",
+            "description": null
+          },
+          {
+            "id": "dDyv",
+            "name": "Tasks",
+            "color": "green",
+            "description": null
+          }
+        ]
+      }
+    },
+    "Planning": {
+      "id": "a337f755-fc2c-457a-958b-230d2f295e09",
+      "name": "Planning",
+      "description": "Recurring objectives & KPIs",
+      "type": "rich_text",
+      "rich_text": {}
+    },
+    "Ok pour bdd bénévoles": {
+      "id": "a5e272ce-37eb-4da4-8100-17c19207d4dc",
+      "name": "Ok pour bdd bénévoles",
+      "description": "(Don't touch it, Lola is responsible)",
+      "type": "checkbox",
+      "checkbox": {}
+    },
+    "Cost (k€)": {
+      "id": "b68b6dad-4dc8-4512-8795-bbfa4cea7df4",
+      "name": "Cost (k€)",
+      "type": "number",
+      "number": {
+        "format": "number"
+      }
+    },
+    "Team": {
+      "id": "baa55b34-bd78-4ac3-8b50-2a4db3e4b001",
+      "name": "Team",
+      "type": "select",
+      "select": {
+        "options": [
+          {
+            "id": "M\\@q",
+            "name": "Policy",
+            "color": "purple",
+            "description": null
+          },
+          {
+            "id": "9fd25579-2e46-4b82-a4c5-307469844ab8",
+            "name": "Sensibilisation grand public",
+            "color": "green",
+            "description": null
+          },
+          {
+            "id": "5a55440c-471c-4b92-acbc-0fcc8ac6d607",
+            "name": "R&D",
+            "color": "blue",
+            "description": null
+          },
+          {
+            "id": "f312c580-8660-485d-b331-0599deaf0124",
+            "name": "Éducation",
+            "color": "yellow",
+            "description": null
+          },
+          {
+            "id": "43fcf075-699a-449b-af2e-f450f210a20b",
+            "name": "Interne & croissance",
+            "color": "red",
+            "description": null
+          },
+          {
+            "id": "0b23d312-a701-4fa8-ab35-f9cb770e9c36",
+            "name": "Textbook",
+            "color": "brown",
+            "description": null
+          },
+          {
+            "id": "852471be-15e9-4939-a6d5-5dc09bbb59da",
+            "name": "Leadership",
+            "color": "gray",
+            "description": null
+          },
+          {
+            "id": "d27de843-e12a-4977-b77f-476d84f9a73b",
+            "name": "Ops",
+            "color": "default",
+            "description": null
+          }
+        ]
+      }
+    },
+    "Achievement": {
+      "id": "c00d06c1-0222-483b-9f6c-d7ecb007166a",
+      "name": "Achievement",
+      "description": "Things that we could put in an impact report. Used to track our impact. Check this box even if the project isn't finished yet.",
+      "type": "checkbox",
+      "checkbox": {}
+    },
+    "(old) Project ": {
+      "id": "c394d32f-3182-47bb-9d2c-32794d4c2351",
+      "name": "(old) Project ",
+      "type": "checkbox",
+      "checkbox": {}
+    },
+    "Comments": {
+      "id": "cccdbf31-bcde-4b0e-add4-65119e3d5452",
+      "name": "Comments",
+      "type": "rich_text",
+      "rich_text": {}
+    },
+    "Description of project": {
+      "id": "e0a381e9-3a93-4df3-a0c3-7e57a8167427",
+      "name": "Description of project",
+      "type": "rich_text",
+      "rich_text": {}
+    },
+    "Finished on": {
+      "id": "ee7c588b-010c-4f7c-abc2-c2be15f15046",
+      "name": "Finished on",
+      "description": "",
+      "type": "date",
+      "date": {}
+    },
+    "Description of missions for volunteers": {
+      "id": "f9d97f8e-051c-4115-9604-6dbf7a1ec9e8",
+      "name": "Description of missions for volunteers",
+      "type": "rich_text",
+      "rich_text": {}
+    }
+  },
+  "parent": {
+    "type": "block_id",
+    "block_id": "14466ef0-2bab-8012-89ac-e015a2af13d3"
+  },
+  "url": "https://www.notion.so/1b966ef02bab80cc9e51d8a48308b4fe",
+  "public_url": null,
+  "archived": false,
+  "in_trash": false,
+  "request_id": "25f0ab58-bbb7-42ec-ac57-67d18e8b332a"
+}

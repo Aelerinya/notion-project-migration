@@ -1,0 +1,612 @@
+{
+  "object": "database",
+  "id": "f22a6d02-e2d0-4c6c-ae8b-20818cedd576",
+  "cover": {
+    "type": "external",
+    "external": {
+      "url": "https://images.unsplash.com/photo-1515847049296-a281d6401047?ixlib=rb-1.2.1&q=80&cs=tinysrgb&fm=jpg&crop=entropy"
+    }
+  },
+  "icon": {
+    "type": "emoji",
+    "emoji": "✅"
+  },
+  "created_time": "2022-09-19T07:47:00.000Z",
+  "created_by": {
+    "object": "user",
+    "id": "14814274-6404-447c-b264-0de0f2596b40"
+  },
+  "last_edited_by": {
+    "object": "user",
+    "id": "9494ea4b-765a-4eac-9cc2-39feef9c4bb7"
+  },
+  "last_edited_time": "2025-08-19T09:22:00.000Z",
+  "title": [
+    {
+      "type": "text",
+      "text": {
+        "content": "Tasks",
+        "link": null
+      },
+      "annotations": {
+        "bold": false,
+        "italic": false,
+        "strikethrough": false,
+        "underline": false,
+        "code": false,
+        "color": "default"
+      },
+      "plain_text": "Tasks",
+      "href": null
+    }
+  ],
+  "description": [],
+  "is_inline": false,
+  "properties": {
+    "Description si volunteers needed": {
+      "id": "%3BLSA",
+      "name": "Description si volunteers needed",
+      "type": "rich_text",
+      "rich_text": {}
+    },
+    "Status": {
+      "id": "%3DaHb",
+      "name": "Status",
+      "type": "status",
+      "status": {
+        "options": [
+          {
+            "id": "j?mQ",
+            "name": "Today",
+            "color": "orange",
+            "description": null
+          },
+          {
+            "id": "yORD",
+            "name": "Maybe today",
+            "color": "orange",
+            "description": null
+          },
+          {
+            "id": "7f66a21c-743a-4c44-89f1-679baf7559db",
+            "name": "Todo",
+            "color": "red",
+            "description": null
+          },
+          {
+            "id": "\\Zwh",
+            "name": "On hold",
+            "color": "purple",
+            "description": null
+          },
+          {
+            "id": "uA?l",
+            "name": "Coming",
+            "color": "gray",
+            "description": null
+          },
+          {
+            "id": "_^Hn",
+            "name": "To be evaluated",
+            "color": "yellow",
+            "description": null
+          },
+          {
+            "id": "8d63ee74-a414-407d-8ac2-54aa28046ea4",
+            "name": "Ongoing",
+            "color": "blue",
+            "description": null
+          },
+          {
+            "id": "qcbk",
+            "name": "To be proofread",
+            "color": "purple",
+            "description": null
+          },
+          {
+            "id": "ndAT",
+            "name": "Recurring",
+            "color": "pink",
+            "description": null
+          },
+          {
+            "id": "Jc<n",
+            "name": "Cancelled",
+            "color": "gray",
+            "description": null
+          },
+          {
+            "id": "7ad42cf7-91bb-4e28-8d30-53817d4e39a4",
+            "name": "Done",
+            "color": "green",
+            "description": null
+          }
+        ],
+        "groups": [
+          {
+            "id": "f7c8cf44-46e9-43c9-91cb-d550ce44a032",
+            "name": "To-do",
+            "color": "gray",
+            "option_ids": [
+              "j?mQ",
+              "yORD",
+              "_^Hn",
+              "7f66a21c-743a-4c44-89f1-679baf7559db",
+              "\\Zwh",
+              "uA?l"
+            ]
+          },
+          {
+            "id": "f0608b4d-e07f-4944-94f7-afb81cec4423",
+            "name": "In progress",
+            "color": "blue",
+            "option_ids": [
+              "8d63ee74-a414-407d-8ac2-54aa28046ea4",
+              "qcbk",
+              "ndAT"
+            ]
+          },
+          {
+            "id": "43ea862e-6b56-417c-9532-d07ecdd97347",
+            "name": "Complete",
+            "color": "green",
+            "option_ids": [
+              "Jc<n",
+              "7ad42cf7-91bb-4e28-8d30-53817d4e39a4"
+            ]
+          }
+        ]
+      }
+    },
+    "€ Explanation": {
+      "id": "%40pp%5D",
+      "name": "€ Explanation",
+      "description": "Un petit résumé de la façon dont la valeur a été déterminée. Ce résumé doit comprendre quelques calculs.",
+      "type": "rich_text",
+      "rich_text": {}
+    },
+    "Task/project/activity": {
+      "id": "C%5Em%7B",
+      "name": "Task/project/activity",
+      "type": "select",
+      "select": {
+        "options": [
+          {
+            "id": "peDW",
+            "name": "Task",
+            "color": "green",
+            "description": null
+          },
+          {
+            "id": "FxsZ",
+            "name": "Project",
+            "color": "orange",
+            "description": null
+          },
+          {
+            "id": "vxI]",
+            "name": "Activity",
+            "color": "pink",
+            "description": null
+          }
+        ]
+      }
+    },
+    "Event": {
+      "id": "FD%3BA",
+      "name": "Event",
+      "type": "checkbox",
+      "checkbox": {}
+    },
+    "Duration (h)": {
+      "id": "FtFb",
+      "name": "Duration (h)",
+      "type": "number",
+      "number": {
+        "format": "number"
+      }
+    },
+    "Bloque": {
+      "id": "HxQk",
+      "name": "Bloque",
+      "type": "relation",
+      "relation": {
+        "database_id": "f22a6d02-e2d0-4c6c-ae8b-20818cedd576",
+        "type": "dual_property",
+        "dual_property": {
+          "synced_property_name": "Bloqué par",
+          "synced_property_id": "YMTo"
+        }
+      }
+    },
+    "V/€": {
+      "id": "JPLd",
+      "name": "V/€",
+      "type": "formula",
+      "formula": {
+        "expression": "round(10*{{notion:block_property:vOBl:00000000-0000-0000-0000-000000000000:76ff8bc7-a796-4bf1-aeee-7893120f72eb}}/{{notion:block_property:_I~w:00000000-0000-0000-0000-000000000000:76ff8bc7-a796-4bf1-aeee-7893120f72eb}})/10"
+      }
+    },
+    "Deadline": {
+      "id": "JTpp",
+      "name": "Deadline",
+      "description": "",
+      "type": "date",
+      "date": {}
+    },
+    "Supervisor": {
+      "id": "JW%7Dw",
+      "name": "Supervisor",
+      "type": "people",
+      "people": {}
+    },
+    "Participants": {
+      "id": "L%3D%3CH",
+      "name": "Participants",
+      "type": "people",
+      "people": {}
+    },
+    "Type of publication": {
+      "id": "On%5ED",
+      "name": "Type of publication",
+      "description": "",
+      "type": "multi_select",
+      "multi_select": {
+        "options": [
+          {
+            "id": "|LqA",
+            "name": "Policy report",
+            "color": "green",
+            "description": null
+          },
+          {
+            "id": "|kTe",
+            "name": "Youtube (à split ?)",
+            "color": "red",
+            "description": null
+          },
+          {
+            "id": "ZNWe",
+            "name": "Site Vulgarisation",
+            "color": "yellow",
+            "description": null
+          },
+          {
+            "id": "A_iq",
+            "name": "Post Linkedin",
+            "color": "blue",
+            "description": null
+          }
+        ]
+      }
+    },
+    "Scheduled for": {
+      "id": "PxB%7C",
+      "name": "Scheduled for",
+      "type": "date",
+      "date": {}
+    },
+    "Creation time": {
+      "id": "UbMf",
+      "name": "Creation time",
+      "type": "created_time",
+      "created_time": {}
+    },
+    "Created by": {
+      "id": "V%5DCz",
+      "name": "Created by",
+      "type": "created_by",
+      "created_by": {}
+    },
+    "Volunteers needed": {
+      "id": "W%3Bhw",
+      "name": "Volunteers needed",
+      "type": "checkbox",
+      "checkbox": {}
+    },
+    "Deadline setter": {
+      "id": "WpXz",
+      "name": "Deadline setter",
+      "description": "Careful, by using this priority, you add a deadline",
+      "type": "select",
+      "select": {
+        "options": [
+          {
+            "id": "41110502-b154-45df-93e4-353e0b6740c4",
+            "name": "1 🔥 - deadline 2d",
+            "color": "red",
+            "description": null
+          },
+          {
+            "id": "5f3fa520-ec3b-4548-bd42-4a98e7b23684",
+            "name": "2 - deadline 1w",
+            "color": "yellow",
+            "description": null
+          },
+          {
+            "id": "56905259-7920-4e67-b5d9-1166598b81f7",
+            "name": "3 - deadline 1m",
+            "color": "blue",
+            "description": null
+          },
+          {
+            "id": "e10af84a-a725-464e-b6a5-7489cb8a8564",
+            "name": "4 - deadline 3m",
+            "color": "default",
+            "description": null
+          },
+          {
+            "id": "3b470379-3e89-4649-9c52-9410397c8125",
+            "name": "not-urgent",
+            "color": "brown",
+            "description": null
+          }
+        ]
+      }
+    },
+    "V/h": {
+      "id": "Xebd",
+      "name": "V/h",
+      "description": "The end metric to optimize for.",
+      "type": "formula",
+      "formula": {
+        "expression": "round(10*{{notion:block_property:vOBl:00000000-0000-0000-0000-000000000000:76ff8bc7-a796-4bf1-aeee-7893120f72eb}}/{{notion:block_property:FtFb:00000000-0000-0000-0000-000000000000:76ff8bc7-a796-4bf1-aeee-7893120f72eb}})/10"
+      }
+    },
+    "Bloqué par": {
+      "id": "YMTo",
+      "name": "Bloqué par",
+      "type": "relation",
+      "relation": {
+        "database_id": "f22a6d02-e2d0-4c6c-ae8b-20818cedd576",
+        "type": "dual_property",
+        "dual_property": {
+          "synced_property_name": "Bloque",
+          "synced_property_id": "HxQk"
+        }
+      }
+    },
+    "% V project": {
+      "id": "YnV~",
+      "name": "% V project",
+      "description": "% of the project's value",
+      "type": "number",
+      "number": {
+        "format": "number"
+      }
+    },
+    "Parent item": {
+      "id": "Z%3A%3BS",
+      "name": "Parent item",
+      "type": "relation",
+      "relation": {
+        "database_id": "f22a6d02-e2d0-4c6c-ae8b-20818cedd576",
+        "type": "dual_property",
+        "dual_property": {
+          "synced_property_name": "Subtask",
+          "synced_property_id": "jhy_"
+        }
+      }
+    },
+    "Milestone": {
+      "id": "%5BHne",
+      "name": "Milestone",
+      "type": "checkbox",
+      "checkbox": {}
+    },
+    "Cost (k€)": {
+      "id": "_I~w",
+      "name": "Cost (k€)",
+      "type": "number",
+      "number": {
+        "format": "number"
+      }
+    },
+    "Importance": {
+      "id": "bbs%3F",
+      "name": "Importance",
+      "type": "select",
+      "select": {
+        "options": [
+          {
+            "id": "=FFC",
+            "name": "⭐⭐⭐⭐",
+            "color": "green",
+            "description": null
+          },
+          {
+            "id": "]n?B",
+            "name": "⭐⭐⭐",
+            "color": "yellow",
+            "description": null
+          },
+          {
+            "id": "m@qZ",
+            "name": "⭐⭐",
+            "color": "red",
+            "description": null
+          },
+          {
+            "id": "FLVa",
+            "name": "⭐",
+            "color": "gray",
+            "description": null
+          }
+        ]
+      }
+    },
+    "Achievement": {
+      "id": "fbUn",
+      "name": "Achievement",
+      "description": "Things that we could put in an impact report. Used to track our impact. Check this box even if the project isn't finished yet.",
+      "type": "checkbox",
+      "checkbox": {}
+    },
+    "V explanation": {
+      "id": "h%5DjM",
+      "name": "V explanation",
+      "description": "A little summary of how the value was determined. This should include little calculations.",
+      "type": "rich_text",
+      "rich_text": {}
+    },
+    "Subtask": {
+      "id": "jhy_",
+      "name": "Subtask",
+      "type": "relation",
+      "relation": {
+        "database_id": "f22a6d02-e2d0-4c6c-ae8b-20818cedd576",
+        "type": "dual_property",
+        "dual_property": {
+          "synced_property_name": "Parent item",
+          "synced_property_id": "Z%3A%3BS"
+        }
+      }
+    },
+    "(old) Project ": {
+      "id": "kiEj",
+      "name": "(old) Project ",
+      "type": "checkbox",
+      "checkbox": {}
+    },
+    "Last status change": {
+      "id": "p%3EPe",
+      "name": "Last status change",
+      "type": "date",
+      "date": {}
+    },
+    "Last edited time": {
+      "id": "q%40ak",
+      "name": "Last edited time",
+      "type": "last_edited_time",
+      "last_edited_time": {}
+    },
+    "Statut éditorial": {
+      "id": "sgkd",
+      "name": "Statut éditorial",
+      "type": "rich_text",
+      "rich_text": {}
+    },
+    "Finished on": {
+      "id": "tcI_",
+      "name": "Finished on",
+      "type": "date",
+      "date": {}
+    },
+    "V override (k€)": {
+      "id": "v%3Aw%3A",
+      "name": "V override (k€)",
+      "description": "Use this if you prefer to give a direct value instead of using a % of the parent project",
+      "type": "number",
+      "number": {
+        "format": "number"
+      }
+    },
+    "Final Value (k€)": {
+      "id": "vOBl",
+      "name": "Final Value (k€)",
+      "type": "formula",
+      "formula": {
+        "expression": "if({{notion:block_property:v%3Aw%3A:00000000-0000-0000-0000-000000000000:76ff8bc7-a796-4bf1-aeee-7893120f72eb}}, {{notion:block_property:v%3Aw%3A:00000000-0000-0000-0000-000000000000:76ff8bc7-a796-4bf1-aeee-7893120f72eb}}, if({{notion:block_property:bbs%3F:00000000-0000-0000-0000-000000000000:76ff8bc7-a796-4bf1-aeee-7893120f72eb}} == \"⭐⭐⭐⭐\", 10, 0) + if({{notion:block_property:bbs%3F:00000000-0000-0000-0000-000000000000:76ff8bc7-a796-4bf1-aeee-7893120f72eb}} == \"⭐⭐⭐\", 1, 0) + if({{notion:block_property:bbs%3F:00000000-0000-0000-0000-000000000000:76ff8bc7-a796-4bf1-aeee-7893120f72eb}} == \"⭐⭐\", 0.1, 0) + if({{notion:block_property:bbs%3F:00000000-0000-0000-0000-000000000000:76ff8bc7-a796-4bf1-aeee-7893120f72eb}} == \"⭐\", 0.01, 0) + {{notion:block_property:%3EbTc:00000000-0000-0000-0000-000000000000:76ff8bc7-a796-4bf1-aeee-7893120f72eb}}.sum()*{{notion:block_property:YnV~:00000000-0000-0000-0000-000000000000:76ff8bc7-a796-4bf1-aeee-7893120f72eb}} /100)"
+      }
+    },
+    "In charge": {
+      "id": "w%3FUi",
+      "name": "In charge",
+      "description": "Responsable in french",
+      "type": "people",
+      "people": {}
+    },
+    "Projects": {
+      "id": "yzNl",
+      "name": "Projects",
+      "description": "",
+      "type": "relation",
+      "relation": {
+        "database_id": "1b966ef0-2bab-80cc-9e51-d8a48308b4fe",
+        "type": "dual_property",
+        "dual_property": {
+          "synced_property_name": "Tasks",
+          "synced_property_id": "KpNf"
+        }
+      }
+    },
+    "Name": {
+      "id": "title",
+      "name": "Name",
+      "type": "title",
+      "title": {}
+    },
+    "Team": {
+      "id": "47faebc3-5fc3-43e9-88c4-cdad08a51e92",
+      "name": "Team",
+      "type": "select",
+      "select": {
+        "options": [
+          {
+            "id": "M\\@q",
+            "name": "Policy",
+            "color": "purple",
+            "description": null
+          },
+          {
+            "id": "9fd25579-2e46-4b82-a4c5-307469844ab8",
+            "name": "Sensibilisation grand public",
+            "color": "green",
+            "description": null
+          },
+          {
+            "id": "5a55440c-471c-4b92-acbc-0fcc8ac6d607",
+            "name": "R&D",
+            "color": "blue",
+            "description": null
+          },
+          {
+            "id": "f312c580-8660-485d-b331-0599deaf0124",
+            "name": "Éducation",
+            "color": "yellow",
+            "description": null
+          },
+          {
+            "id": "43fcf075-699a-449b-af2e-f450f210a20b",
+            "name": "Interne & croissance",
+            "color": "red",
+            "description": null
+          },
+          {
+            "id": "0b23d312-a701-4fa8-ab35-f9cb770e9c36",
+            "name": "Textbook",
+            "color": "brown",
+            "description": null
+          },
+          {
+            "id": "852471be-15e9-4939-a6d5-5dc09bbb59da",
+            "name": "Leadership",
+            "color": "gray",
+            "description": null
+          },
+          {
+            "id": "d27de843-e12a-4977-b77f-476d84f9a73b",
+            "name": "Meta",
+            "color": "default",
+            "description": null
+          }
+        ]
+      }
+    },
+    "Comments & updates": {
+      "id": "bb008330-6c65-4ff3-b1b0-064ecdd988a3",
+      "name": "Comments & updates",
+      "type": "rich_text",
+      "rich_text": {}
+    }
+  },
+  "parent": {
+    "type": "block_id",
+    "block_id": "14466ef0-2bab-8012-89ac-e015a2af13d3"
+  },
+  "url": "https://www.notion.so/f22a6d02e2d04c6cae8b20818cedd576",
+  "public_url": null,
+  "archived": false,
+  "in_trash": false,
+  "request_id": "34ef3e0c-6f02-4526-a667-bff29199ba8b"
+}
