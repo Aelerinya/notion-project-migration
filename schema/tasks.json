@@ -20,7 +20,7 @@
     "object": "user",
     "id": "9494ea4b-765a-4eac-9cc2-39feef9c4bb7"
   },
-  "last_edited_time": "2025-08-19T13:36:00.000Z",
+  "last_edited_time": "2025-08-20T09:37:00.000Z",
   "title": [
     {
       "type": "text",
@@ -468,6 +468,27 @@
       "type": "checkbox",
       "checkbox": {}
     },
+    "Migration status": {
+      "id": "nWuw",
+      "name": "Migration status",
+      "type": "select",
+      "select": {
+        "options": [
+          {
+            "id": "Voq@",
+            "name": "Subtask to relink",
+            "color": "yellow",
+            "description": null
+          },
+          {
+            "id": "d65d7574-c2e3-4f93-a53e-bca0170cf69a",
+            "name": "Project to migrate",
+            "color": "pink",
+            "description": null
+          }
+        ]
+      }
+    },
     "Last status change": {
       "id": "p%3EPe",
       "name": "Last status change",
@@ -620,5 +641,5 @@
   "public_url": null,
   "archived": false,
   "in_trash": false,
-  "request_id": "b3faf988-0a91-4f4b-8f50-79cba99d286e"
+  "request_id": "6410f64d-df32-4a9d-9772-cd299368a112"
 }
