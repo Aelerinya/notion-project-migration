@@ -26,6 +26,7 @@ Subcommands:
   - Team: R&D
   - Comments & updates: "Test migration project created for database migration testing purposes."
   - Projects: "Separate tasks db" (ID: 23f66ef02bab80d7b205d1b31f3aad2e)
+  - Migration status: "Project to migrate"
 - Creates 2 test subtasks that reference the project via "Parent item" relation:
   - Subtask 1: Duration 2h, Cost 0.5k€, Team R&D
   - Subtask 2: Duration 1.5h, Cost 0.3k€, Team R&D

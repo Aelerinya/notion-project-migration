@@ -20,7 +20,7 @@
     "object": "user",
     "id": "9494ea4b-765a-4eac-9cc2-39feef9c4bb7"
   },
-  "last_edited_time": "2025-08-20T09:37:00.000Z",
+  "last_edited_time": "2025-08-20T15:51:00.000Z",
   "title": [
     {
       "type": "text",
@@ -402,6 +402,18 @@
         "format": "number"
       }
     },
+    "TMP project owners": {
+      "id": "%60tf%3B",
+      "name": "TMP project owners",
+      "type": "rollup",
+      "rollup": {
+        "rollup_property_name": "Owner",
+        "relation_property_name": "Projects",
+        "rollup_property_id": "AHRA",
+        "relation_property_id": "yzNl",
+        "function": "show_original"
+      }
+    },
     "Importance": {
       "id": "bbs%3F",
       "name": "Importance",
@@ -474,6 +486,12 @@
       "type": "select",
       "select": {
         "options": [
+          {
+            "id": "E]JP",
+            "name": "Error",
+            "color": "blue",
+            "description": null
+          },
           {
             "id": "Voq@",
             "name": "Subtask to relink",
@@ -641,5 +659,5 @@
   "public_url": null,
   "archived": false,
   "in_trash": false,
-  "request_id": "6410f64d-df32-4a9d-9772-cd299368a112"
+  "request_id": "71c4fcdd-9967-4ad9-bc83-e4c14bd04b01"
 }

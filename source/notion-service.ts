@@ -1,5 +1,5 @@
 import {Client} from '@notionhq/client';
-import {getDatabaseId, type DatabaseType} from './database-config.js';
+import {getDatabaseId, type DatabaseType, DATABASE_IDS} from './database-config.js';
 
 export interface NotionConnectionResult {
 	success: boolean;
@@ -169,6 +169,133 @@ export class NotionService {
 				} database not found or not accessible`;
 			} else if (error?.message) {
 				errorMessage = error.message;
+			}
+
+			return {
+				success: false,
+				error: errorMessage,
+			};
+		}
+	}
+
+	async getProjectsByMigrationStatus(migrationStatus: string): Promise<{success: boolean; error?: string; projects?: any[]}> {
+		if (!this.client) {
+			return {
+				success: false,
+				error: 'No Notion client initialized',
+			};
+		}
+
+		try {
+			const response = await this.client.databases.query({
+				database_id: DATABASE_IDS.TASKS,
+				filter: {
+					property: 'Migration status',
+					select: {
+						equals: migrationStatus,
+					},
+				},
+			});
+
+			return {
+				success: true,
+				projects: response.results,
+			};
+		} catch (error: any) {
+			let errorMessage = 'Failed to query projects by migration status';
+			
+			if (error?.code === 'unauthorized') {
+				errorMessage = 'Invalid API token or insufficient permissions';
+			} else if (error?.message) {
+				errorMessage = `${error.code || 'Error'}: ${error.message}`;
+			}
+
+			return {
+				success: false,
+				error: errorMessage,
+			};
+		}
+	}
+
+	async getSubtasksByMigrationStatus(migrationStatus: string): Promise<{success: boolean; error?: string; subtasks?: any[]}> {
+		if (!this.client) {
+			return {
+				success: false,
+				error: 'No Notion client initialized',
+			};
+		}
+
+		try {
+			const response = await this.client.databases.query({
+				database_id: DATABASE_IDS.TASKS,
+				filter: {
+					and: [
+						{
+							property: 'Migration status',
+							select: {
+								equals: migrationStatus,
+							},
+						},
+						{
+							property: 'Task/project/activity',
+							select: {
+								equals: 'Task',
+							},
+						},
+					],
+				},
+			});
+
+			return {
+				success: true,
+				subtasks: response.results,
+			};
+		} catch (error: any) {
+			let errorMessage = 'Failed to query subtasks by migration status';
+			
+			if (error?.code === 'unauthorized') {
+				errorMessage = 'Invalid API token or insufficient permissions';
+			} else if (error?.message) {
+				errorMessage = `${error.code || 'Error'}: ${error.message}`;
+			}
+
+			return {
+				success: false,
+				error: errorMessage,
+			};
+		}
+	}
+
+	async getProjectsInProjectsDB(migrationStatus: string): Promise<{success: boolean; error?: string; projects?: any[]}> {
+		if (!this.client) {
+			return {
+				success: false,
+				error: 'No Notion client initialized',
+			};
+		}
+
+		try {
+			const response = await this.client.databases.query({
+				database_id: DATABASE_IDS.PROJECTS,
+				filter: {
+					property: 'Migration status',
+					select: {
+						equals: migrationStatus,
+					},
+				},
+			});
+
+			return {
+				success: true,
+				projects: response.results,
+			};
+		} catch (error: any) {
+			let errorMessage = 'Failed to query projects in Projects DB by migration status';
+			
+			if (error?.code === 'unauthorized') {
+				errorMessage = 'Invalid API token or insufficient permissions';
+			} else if (error?.message) {
+				errorMessage = `${error.code || 'Error'}: ${error.message}`;
 			}
 
 			return {

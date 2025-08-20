@@ -4,6 +4,7 @@ import TestConnection from './test-connection.js';
 import Schema from './schema.js';
 import MigrateTest from './migrate-test.js';
 import ListUsers from './list-users.js';
+import Migrate, {CreateTestProject} from './migrate.js';
 
 type Props = {
 	command?: string;
@@ -27,6 +28,14 @@ export default function App({command, subcommand, token, json}: Props) {
 
 	if (command === 'list-users') {
 		return <ListUsers token={token} />;
+	}
+
+	if (command === 'create-test-project') {
+		return <CreateTestProject token={token} />;
+	}
+
+	if (command === 'migrate') {
+		return <Migrate subcommand={subcommand} token={token} />;
 	}
 
 	if (!command) {
