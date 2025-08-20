@@ -18,10 +18,17 @@ Subcommands:
   - Task/project/activity: "Project" 
   - Status: "Done"
   - Deadline: 1 march 2025
-  - In charge: Lucie Philippon (TODO: add id)
-  - Supervisor: Florent Berther (TODO: add id)
-  - Projects: "Separate tasks db" (TODO: add id)
-- Creates 2 test subtask that references the project via "Parent item" relation
+  - Duration (h): 10
+  - Cost (k€): 5
+  - In charge: Lucie Philippon (ID: 9494ea4b-765a-4eac-9cc2-39feef9c4bb7)
+  - Supervisor: Florent Berthet (ID: 6d25e541-6b16-41c1-be36-8c2f548f0f36)
+  - Importance: ⭐⭐⭐⭐
+  - Team: R&D
+  - Comments & updates: "Test migration project created for database migration testing purposes."
+  - Projects: "Separate tasks db" (ID: 23f66ef02bab80d7b205d1b31f3aad2e)
+- Creates 2 test subtasks that reference the project via "Parent item" relation:
+  - Subtask 1: Duration 2h, Cost 0.5k€, Team R&D
+  - Subtask 2: Duration 1.5h, Cost 0.3k€, Team R&D
 
 # New migration proposal
 
