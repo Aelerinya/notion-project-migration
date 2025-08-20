@@ -17,7 +17,7 @@
     "object": "user",
     "id": "9494ea4b-765a-4eac-9cc2-39feef9c4bb7"
   },
-  "last_edited_time": "2025-08-19T09:22:00.000Z",
+  "last_edited_time": "2025-08-20T16:11:00.000Z",
   "title": [
     {
       "type": "text",
@@ -145,6 +145,18 @@
             ]
           }
         ]
+      }
+    },
+    "TMP subtask Migration status": {
+      "id": "J%5D%3Af",
+      "name": "TMP subtask Migration status",
+      "type": "rollup",
+      "rollup": {
+        "rollup_property_name": "Migration status",
+        "relation_property_name": "Tasks",
+        "rollup_property_id": "nWuw",
+        "relation_property_id": "KpNf",
+        "function": "show_original"
       }
     },
     "Tasks": {
@@ -369,12 +381,11 @@
         ]
       }
     },
-    "Start and end dates (approximate possible)": {
-      "id": "48053027-b77c-4977-9998-c5ed2d843167",
-      "name": "Start and end dates (approximate possible)",
-      "description": "You will get a notification when a deadline has passed.",
-      "type": "date",
-      "date": {}
+    "Subtasks to transfer": {
+      "id": "5199f18e-dd98-43d7-807a-bab165f23b02",
+      "name": "Subtasks to transfer",
+      "type": "rich_text",
+      "rich_text": {}
     },
     "€ Explanation": {
       "id": "544da9a0-a480-4e68-aa15-d1b5e7391007",
@@ -382,6 +393,33 @@
       "description": "Explainer of how the value was determined.",
       "type": "rich_text",
       "rich_text": {}
+    },
+    "Migration status": {
+      "id": "56f26987-4e7c-40fd-9a67-57dc14aeb8b6",
+      "name": "Migration status",
+      "type": "select",
+      "select": {
+        "options": [
+          {
+            "id": "E]JP",
+            "name": "Error",
+            "color": "blue",
+            "description": null
+          },
+          {
+            "id": "Voq@",
+            "name": "Subtask to relink",
+            "color": "yellow",
+            "description": null
+          },
+          {
+            "id": "d65d7574-c2e3-4f93-a53e-bca0170cf69a",
+            "name": "Project to migrate",
+            "color": "pink",
+            "description": null
+          }
+        ]
+      }
     },
     "Task/project/activity": {
       "id": "5fdf6b13-625c-438f-a6ba-695187a42ceb",
@@ -410,12 +448,59 @@
         ]
       }
     },
+    "Deadline": {
+      "id": "61a59e5c-a57e-4d32-a3a0-2d47a1e6a234",
+      "name": "Deadline",
+      "description": "",
+      "type": "date",
+      "date": {}
+    },
     "Volunteers needed": {
       "id": "73f009e6-b041-4f8a-ac60-a421d4d24f81",
       "name": "Volunteers needed",
       "description": "If you need volunteers for projects or activity",
       "type": "checkbox",
       "checkbox": {}
+    },
+    "Deadline setter": {
+      "id": "7b973b84-d660-4547-acf4-6d37511278e9",
+      "name": "Deadline setter",
+      "description": "Careful, by using this priority, you add a deadline",
+      "type": "select",
+      "select": {
+        "options": [
+          {
+            "id": "41110502-b154-45df-93e4-353e0b6740c4",
+            "name": "1 🔥 - deadline 2d",
+            "color": "red",
+            "description": null
+          },
+          {
+            "id": "5f3fa520-ec3b-4548-bd42-4a98e7b23684",
+            "name": "2 - deadline 1w",
+            "color": "yellow",
+            "description": null
+          },
+          {
+            "id": "56905259-7920-4e67-b5d9-1166598b81f7",
+            "name": "3 - deadline 1m",
+            "color": "blue",
+            "description": null
+          },
+          {
+            "id": "e10af84a-a725-464e-b6a5-7489cb8a8564",
+            "name": "4 - deadline 3m",
+            "color": "default",
+            "description": null
+          },
+          {
+            "id": "3b470379-3e89-4649-9c52-9410397c8125",
+            "name": "not-urgent",
+            "color": "brown",
+            "description": null
+          }
+        ]
+      }
     },
     "Type of publication": {
       "id": "7bfb05f2-8eef-4647-b5c7-a81c4785f484",
@@ -608,6 +693,12 @@
         ]
       }
     },
+    "Last status change": {
+      "id": "bc31a0b5-d259-45d1-a218-1c4017a96aef",
+      "name": "Last status change",
+      "type": "date",
+      "date": {}
+    },
     "Achievement": {
       "id": "c00d06c1-0222-483b-9f6c-d7ecb007166a",
       "name": "Achievement",
@@ -621,9 +712,21 @@
       "type": "checkbox",
       "checkbox": {}
     },
-    "Comments": {
+    "Description si volunteers needed": {
+      "id": "cc78204b-af31-4fb9-9b4b-03c6c3b612b8",
+      "name": "Description si volunteers needed",
+      "type": "rich_text",
+      "rich_text": {}
+    },
+    "Comments & updates": {
       "id": "cccdbf31-bcde-4b0e-add4-65119e3d5452",
-      "name": "Comments",
+      "name": "Comments & updates",
+      "type": "rich_text",
+      "rich_text": {}
+    },
+    "Parent projects to transfer": {
+      "id": "cf4d083a-3cfb-470f-8c16-208bcf99ee8f",
+      "name": "Parent projects to transfer",
       "type": "rich_text",
       "rich_text": {}
     },
@@ -645,6 +748,39 @@
       "name": "Description of missions for volunteers",
       "type": "rich_text",
       "rich_text": {}
+    },
+    "Importance": {
+      "id": "ff8701db-97cc-4d81-b48b-16a24df286c0",
+      "name": "Importance",
+      "type": "select",
+      "select": {
+        "options": [
+          {
+            "id": "=FFC",
+            "name": "⭐⭐⭐⭐",
+            "color": "green",
+            "description": null
+          },
+          {
+            "id": "]n?B",
+            "name": "⭐⭐⭐",
+            "color": "yellow",
+            "description": null
+          },
+          {
+            "id": "m@qZ",
+            "name": "⭐⭐",
+            "color": "red",
+            "description": null
+          },
+          {
+            "id": "FLVa",
+            "name": "⭐",
+            "color": "gray",
+            "description": null
+          }
+        ]
+      }
     }
   },
   "parent": {
@@ -655,5 +791,5 @@
   "public_url": null,
   "archived": false,
   "in_trash": false,
-  "request_id": "25f0ab58-bbb7-42ec-ac57-67d18e8b332a"
+  "request_id": "60b95ee1-9424-488a-b782-4980a058e4be"
 }

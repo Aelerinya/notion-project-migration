@@ -27,7 +27,7 @@ export default function CompleteStep({movedUrl, updateResponse}: Props) {
 					<Text color="gray">• Importance → Impact</Text>
 					<Text color="gray">• Comments & updates → Comments</Text>
 					<Text color="gray">• In charge → Owner (if single person)</Text>
-					<Text color="gray">• Deadline → Start and end dates</Text>
+					<Text color="gray">• Deadline → Start and end dates (approximate)</Text>
 					<Text color="gray">• Status: Done → Completed</Text>
 					<Text color="gray">• Parent projects restored from saved data</Text>
 					<Text color="gray">• Subtask connections restored after move</Text>

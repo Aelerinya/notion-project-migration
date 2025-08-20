@@ -33,7 +33,13 @@ Subcommands:
 
 # New migration proposal
 
-Each step will be a different subcommand of the `migrate` command
+Each step will be a different subcommand of the `migrate` command, with some manual steps.
+
+The operator will use [this Database view](https://www.notion.so/centre-securite-ia/25566ef02bab80b9817bcbb54bc6e370?v=25566ef02bab809ba023000c4084154b) to check the progress and perform the manual actions and checks.
+
+## Manual step: Select the projects to migrate
+
+by setting their `Migration status` to `Project to migrate`
 
 ## Step 1: Validation and display `initial-validation`
 - Target: All Tasks where `Migration status` is `Project to migrate`
@@ -72,6 +78,10 @@ Each step will be a different subcommand of the `migrate` command
 - If no subtasks, do nothing. keep Subtasks to transfer as is
 - Display titles of subtasks edited of all projects
 
+## Manual step: Check all subtasks were saved
+
+In view `Check substasks marked` check that they all have the status `Subtask to relink`
+
 ## Step 5: Remove substasks relations `remove-subtasks`
 - Target: All Tasks where `Migration status` is `Project to migrate`
 - Clears the "Subtask" relation (sets to empty array)
@@ -102,3 +112,7 @@ Each step will be a different subcommand of the `migrate` command
 ## Step 9: Relink subtasks `relink-subtasks`
 - Target: All `Projects` (project DB) where `Migration status` is `Project to migrate`
 - Reads "Subtasks to transfer" field with stored subtask IDs, and restores connection in `Tasks` relation
+
+## Manual step: Check all substasks were relinked
+
+## Manual step: Remove all migration status

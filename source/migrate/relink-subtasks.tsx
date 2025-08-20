@@ -116,20 +116,20 @@ export default function RelinkSubtasks({token}: Props) {
 				}
 
 				// Clear the transfer field after processing
-				await client.pages.update({
-					page_id: project.id,
-					properties: {
-						'Subtasks to transfer': {
-							rich_text: [
-								{
-									text: {
-										content: `Transferred ${successfulConnections} subtask connections on ${new Date().toISOString()}`,
-									},
-								},
-							],
-						},
-					},
-				});
+				// await client.pages.update({
+				// 	page_id: project.id,
+				// 	properties: {
+				// 		'Subtasks to transfer': {
+				// 			rich_text: [
+				// 				{
+				// 					text: {
+				// 						content: `Transferred ${successfulConnections} subtask connections on ${new Date().toISOString()}`,
+				// 					},
+				// 				},
+				// 			],
+				// 		},
+				// 	},
+				// });
 
 				processedProjects.push({
 					project: projectSummary,

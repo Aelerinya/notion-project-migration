@@ -80,12 +80,12 @@ export default function PostMoveUpdate({token}: Props) {
 				}
 
 				// Comments & updates → Comments (rename property)
-				if (properties['Comments & updates']?.rich_text) {
-					updatedProperties.Comments = {
-						rich_text: properties['Comments & updates'].rich_text
-					};
-					updates.push('Comments: Copied from Comments & updates');
-				}
+				// if (properties['Comments & updates']?.rich_text) {
+				// 	updatedProperties.Comments = {
+				// 		rich_text: properties['Comments & updates'].rich_text
+				// 	};
+				// 	updates.push('Comments: Copied from Comments & updates');
+				// }
 
 				// In charge → Owner (only if single person)
 				if (properties['In charge']?.people && properties['In charge'].people.length === 1) {

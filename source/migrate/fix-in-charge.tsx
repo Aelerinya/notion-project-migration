@@ -56,10 +56,40 @@ export default function FixInCharge({token}: Props) {
 
 			const projects = projectsResult.projects || [];
 			const problematicProjects: ProjectWithMultipleInCharge[] = [];
+			const integrationUserId = '338ba5ec-fba4-45c1-b205-98086fa639a2';
+			const integrationUserName = "Lucie's integration for migrations and scripts";
+			let projectsWithNoInCharge = 0;
 
 			for (const project of projects) {
 				const properties = project.properties;
 				const inChargeUsers = properties['In charge']?.people || [];
+
+				// Handle projects with no one in charge - automatically assign integration user
+				if (inChargeUsers.length === 0) {
+					try {
+						await notionClient.pages.update({
+							page_id: project.id,
+							properties: {
+								'In charge': {
+									people: [{id: integrationUserId}],
+								},
+							},
+						});
+						projectsWithNoInCharge++;
+					} catch (error) {
+						// If we can't update, we'll handle this as a problematic project
+						const projectSummary = extractProjectSummary(project);
+						problematicProjects.push({
+							project: {
+								...projectSummary,
+								title: `${projectSummary.title} (ERROR: No one in charge, failed to assign integration)`,
+							},
+							inChargeUsers: [],
+							parentProjects: [],
+						});
+					}
+					continue;
+				}
 
 				if (inChargeUsers.length > 1) {
 					const projectSummary = extractProjectSummary(project);
@@ -110,7 +140,10 @@ export default function FixInCharge({token}: Props) {
 			setLoading(false);
 
 			if (problematicProjects.length === 0) {
-				setResult({success: true, data: {message: 'All projects have single person in charge'}});
+				const message = projectsWithNoInCharge > 0 
+					? `All projects have single person in charge. ${projectsWithNoInCharge} project(s) with no one in charge were automatically assigned to integration user.`
+					: 'All projects have single person in charge';
+				setResult({success: true, data: {message}});
 			}
 		} catch (error: unknown) {
 			let errorMessage = 'Failed to find projects with multiple "In charge"';
