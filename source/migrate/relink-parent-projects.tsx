@@ -8,6 +8,16 @@ interface Props {
 	token?: string;
 }
 
+interface ProgressState {
+	currentProject: number;
+	totalProjects: number;
+	currentProjectName: string;
+	currentParent: number;
+	totalParents: number;
+	phase: 'loading' | 'processing' | 'complete';
+	message: string;
+}
+
 interface ProjectWithRestoredParents {
 	project: ProjectSummary;
 	parentProjectsRestored: number;
@@ -17,6 +27,15 @@ interface ProjectWithRestoredParents {
 export default function RelinkParentProjects({token}: Props) {
 	const [result, setResult] = useState<MigrationResult & {data?: ProjectWithRestoredParents[]} | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [progress, setProgress] = useState<ProgressState>({
+		currentProject: 0,
+		totalProjects: 0,
+		currentProjectName: '',
+		currentParent: 0,
+		totalParents: 0,
+		phase: 'loading',
+		message: 'Initializing parent project restoration...',
+	});
 
 	useEffect(() => {
 		relinkParentProjects();
@@ -35,6 +54,7 @@ export default function RelinkParentProjects({token}: Props) {
 			const notionService = new NotionService('dummy');
 			notionService.client = client;
 
+			setProgress(prev => ({...prev, message: 'Fetching projects from Projects database...'}));
 			const projectsResult = await notionService.getProjectsInProjectsDB('Project to migrate');
 			
 			if (!projectsResult.success) {
@@ -44,10 +64,25 @@ export default function RelinkParentProjects({token}: Props) {
 			}
 
 			const projects = projectsResult.projects || [];
+			setProgress(prev => ({
+				...prev,
+				totalProjects: projects.length,
+				phase: 'processing',
+				message: `Found ${projects.length} project(s) to process`,
+			}));
 			const processedProjects: ProjectWithRestoredParents[] = [];
 
-			for (const project of projects) {
+			for (let i = 0; i < projects.length; i++) {
+				const project = projects[i];
 				const projectSummary = extractProjectSummary(project);
+				
+				setProgress(prev => ({
+					...prev,
+					currentProject: i + 1,
+					currentProjectName: projectSummary.title,
+					message: `Processing project: ${projectSummary.title}`,
+				}));
+				
 				const properties = project.properties;
 
 				try {
@@ -69,6 +104,12 @@ export default function RelinkParentProjects({token}: Props) {
 						.split(',')
 						.map(id => id.trim())
 						.filter(id => id.length > 0);
+						
+					setProgress(prev => ({
+						...prev,
+						totalParents: parentProjectIds.length,
+						message: `Found ${parentProjectIds.length} parent project(s) to restore`,
+					}));
 
 					if (parentProjectIds.length === 0) {
 						processedProjects.push({
@@ -81,7 +122,15 @@ export default function RelinkParentProjects({token}: Props) {
 
 					// Get parent project titles for display
 					const parentProjectTitles: string[] = [];
-					for (const parentId of parentProjectIds) {
+					for (let j = 0; j < parentProjectIds.length; j++) {
+						const parentId = parentProjectIds[j];
+						
+						setProgress(prev => ({
+							...prev,
+							currentParent: j + 1,
+							message: `Getting parent project ${j + 1}/${parentProjectIds.length}`,
+						}));
+						
 						try {
 							const parentPage = await client.pages.retrieve({ page_id: parentId });
 							const parentProps = (parentPage as any).properties;
@@ -142,6 +191,12 @@ export default function RelinkParentProjects({token}: Props) {
 				}
 			}
 
+			setProgress(prev => ({
+				...prev,
+				phase: 'complete',
+				message: `Parent project restoration complete: ${projects.length} project(s) processed`,
+			}));
+			
 			setResult({
 				success: true,
 				data: processedProjects,
@@ -162,9 +217,32 @@ export default function RelinkParentProjects({token}: Props) {
 	};
 
 	if (loading) {
+		if (progress.phase === 'loading') {
+			return (
+				<Box>
+					<Text>{progress.message}</Text>
+				</Box>
+			);
+		}
+		
+		if (progress.phase === 'processing') {
+			return (
+				<Box flexDirection="column">
+					<Text color="blue">Restoring parent project connections...</Text>
+					<Text></Text>
+					<Text color="cyan">Project Progress: {progress.currentProject}/{progress.totalProjects}</Text>
+					<Text color="gray">Current: {progress.currentProjectName}</Text>
+					{progress.totalParents > 0 && (
+						<Text color="cyan">Parent Progress: {progress.currentParent}/{progress.totalParents}</Text>
+					)}
+					<Text color="yellow">{progress.message}</Text>
+				</Box>
+			);
+		}
+		
 		return (
 			<Box>
-				<Text>Restoring parent project connections...</Text>
+				<Text color="green">{progress.message}</Text>
 			</Box>
 		);
 	}

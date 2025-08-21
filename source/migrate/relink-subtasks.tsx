@@ -8,6 +8,14 @@ interface Props {
 	token?: string;
 }
 
+interface ProgressState {
+	currentProject: number;
+	totalProjects: number;
+	currentProjectName: string;
+	phase: 'loading' | 'processing' | 'complete';
+	message: string;
+}
+
 interface ProjectWithRestoredSubtasks {
 	project: ProjectSummary;
 	subtasksRestored: number;
@@ -17,6 +25,13 @@ interface ProjectWithRestoredSubtasks {
 export default function RelinkSubtasks({token}: Props) {
 	const [result, setResult] = useState<MigrationResult & {data?: ProjectWithRestoredSubtasks[]} | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [progress, setProgress] = useState<ProgressState>({
+		currentProject: 0,
+		totalProjects: 0,
+		currentProjectName: '',
+		phase: 'loading',
+		message: 'Initializing task restoration...',
+	});
 
 	useEffect(() => {
 		relinkSubtasks();
@@ -35,6 +50,7 @@ export default function RelinkSubtasks({token}: Props) {
 			const notionService = new NotionService('dummy');
 			notionService.client = client;
 
+			setProgress(prev => ({...prev, message: 'Fetching projects from Projects database...'}));
 			const projectsResult = await notionService.getProjectsInProjectsDB('Project to migrate');
 			
 			if (!projectsResult.success) {
@@ -44,10 +60,25 @@ export default function RelinkSubtasks({token}: Props) {
 			}
 
 			const projects = projectsResult.projects || [];
+			setProgress(prev => ({
+				...prev,
+				totalProjects: projects.length,
+				phase: 'processing',
+				message: `Found ${projects.length} project(s) to process`,
+			}));
 			const processedProjects: ProjectWithRestoredSubtasks[] = [];
 
-			for (const project of projects) {
+			for (let i = 0; i < projects.length; i++) {
+				const project = projects[i];
 				const projectSummary = extractProjectSummary(project);
+				
+				setProgress(prev => ({
+					...prev,
+					currentProject: i + 1,
+					currentProjectName: projectSummary.title,
+					message: `Processing project: ${projectSummary.title}`,
+				}));
+				
 				const properties = project.properties;
 
 				// Read "Subtasks to transfer" field with stored subtask IDs
@@ -65,6 +96,12 @@ export default function RelinkSubtasks({token}: Props) {
 
 				// Parse the comma-separated list of subtask IDs
 				const subtaskIds = subtasksToTransferText.split(', ').map((id: string) => id.trim()).filter(Boolean);
+				
+				setProgress(prev => ({
+					...prev,
+					totalSubtasks: subtaskIds.length,
+					message: `Found ${subtaskIds.length} subtask(s) to restore`,
+				}));
 
 				if (subtaskIds.length === 0) {
 					processedProjects.push({
@@ -75,45 +112,30 @@ export default function RelinkSubtasks({token}: Props) {
 					continue;
 				}
 
-				// Process each subtask to restore connection and get titles
-				const subtaskTitles: string[] = [];
-				let successfulConnections = 0;
+				// Skip title fetching and duplicate checking - update the project's Tasks relation directly
+				setProgress(prev => ({
+					...prev,
+					message: `Updating project's Tasks relation with ${subtaskIds.length} task(s)`,
+				}));
 
-				for (const subtaskId of subtaskIds) {
-					try {
-						// Get current Projects relations for this subtask
-						const currentSubtask = await client.pages.retrieve({ page_id: subtaskId });
-						const currentProps = (currentSubtask as any).properties;
-						
-						const subtaskTitle = currentProps.Name?.title?.[0]?.plain_text || 'Untitled';
-						const existingRelations = currentProps.Projects?.relation || [];
-						
-						// Add the new project ID to Projects relation (avoid duplicates)
-						const relationExists = existingRelations.some((rel: any) => rel.id === project.id);
-						
-						if (!relationExists) {
-							await client.pages.update({
-								page_id: subtaskId,
-								properties: {
-									'Projects': {
-										relation: [
-											...existingRelations,
-											{ id: project.id }
-										],
-									},
-								},
-							});
-							
-							subtaskTitles.push(subtaskTitle);
-							successfulConnections++;
-						} else {
-							subtaskTitles.push(`${subtaskTitle} (already connected)`);
-							successfulConnections++;
-						}
-					} catch (subtaskError: any) {
-						subtaskTitles.push(`Unknown Subtask (ID: ${subtaskId.slice(0, 8)}... - Error: ${subtaskError.message})`);
-					}
-				}
+				const successfulConnections = subtaskIds.length;
+				const subtaskTitles = subtaskIds.map(id => `Task ID: ${id.slice(0, 8)}...`);
+				
+				// Update project's Tasks relation with all tasks at once (no duplicate checking needed for fresh projects)
+				await client.pages.update({
+					page_id: project.id,
+					properties: {
+						'Tasks': {
+							relation: subtaskIds.map(id => ({ id }))
+						},
+					},
+				});
+				
+				setProgress(prev => ({
+					...prev,
+					message: `Successfully restored ${subtaskIds.length} task connection(s)`,
+				}));
+				
 
 				// Clear the transfer field after processing
 				// await client.pages.update({
@@ -138,6 +160,12 @@ export default function RelinkSubtasks({token}: Props) {
 				});
 			}
 
+			setProgress(prev => ({
+				...prev,
+				phase: 'complete',
+				message: `Subtask restoration complete: ${projects.length} project(s) processed`,
+			}));
+			
 			setResult({
 				success: true,
 				data: processedProjects,
@@ -158,9 +186,29 @@ export default function RelinkSubtasks({token}: Props) {
 	};
 
 	if (loading) {
+		if (progress.phase === 'loading') {
+			return (
+				<Box>
+					<Text>{progress.message}</Text>
+				</Box>
+			);
+		}
+		
+		if (progress.phase === 'processing') {
+			return (
+				<Box flexDirection="column">
+					<Text color="blue">Restoring task connections (optimized approach)...</Text>
+					<Text></Text>
+					<Text color="cyan">Project Progress: {progress.currentProject}/{progress.totalProjects}</Text>
+					<Text color="gray">Current: {progress.currentProjectName}</Text>
+					<Text color="yellow">{progress.message}</Text>
+				</Box>
+			);
+		}
+		
 		return (
 			<Box>
-				<Text>Restoring subtask connections to Tasks relation...</Text>
+				<Text color="green">{progress.message}</Text>
 			</Box>
 		);
 	}
@@ -190,19 +238,15 @@ export default function RelinkSubtasks({token}: Props) {
 	return (
 		<Box flexDirection="column">
 			<Text color="green">✓ Processed {processedProjects.length} project(s)</Text>
-			<Text color="green">✓ Restored {totalSubtasksRestored} subtask connection(s)</Text>
+			<Text color="green">✓ Restored {totalSubtasksRestored} task connection(s)</Text>
 			<Text></Text>
 
 			{projectsWithRestoredSubtasks.length > 0 && (
 				<>
-					<Text color="blue">Projects with subtask connections restored ({projectsWithRestoredSubtasks.length}):</Text>
+					<Text color="blue">Projects with task connections restored ({projectsWithRestoredSubtasks.length}):</Text>
 					{projectsWithRestoredSubtasks.map((item, index) => (
 						<Box key={index} flexDirection="column" marginLeft={2}>
-							<Text>{displayProjectSummary(item.project)}</Text>
-							<Text color="gray">  Restored {item.subtasksRestored} subtask connection(s):</Text>
-							{item.subtaskTitles.map((title, titleIndex) => (
-								<Text key={titleIndex} color="gray">    • {title}</Text>
-							))}
+							<Text>{displayProjectSummary(item.project)} - Restored {item.subtasksRestored} task connection(s)</Text>
 						</Box>
 					))}
 					<Text></Text>
@@ -211,13 +255,10 @@ export default function RelinkSubtasks({token}: Props) {
 
 			{projectsWithoutSubtasks.length > 0 && (
 				<>
-					<Text color="gray">Projects with no subtask connections ({projectsWithoutSubtasks.length}):</Text>
+					<Text color="gray">Projects with no task connections ({projectsWithoutSubtasks.length}):</Text>
 					{projectsWithoutSubtasks.map((item, index) => (
 						<Box key={index} flexDirection="column" marginLeft={2}>
 							<Text>{displayProjectSummary(item.project)}</Text>
-							{item.subtaskTitles.length > 0 && (
-								<Text color="gray">  {item.subtaskTitles[0]}</Text>
-							)}
 						</Box>
 					))}
 					<Text></Text>
@@ -225,11 +266,11 @@ export default function RelinkSubtasks({token}: Props) {
 			)}
 
 			<Text color="blue">Summary:</Text>
-			<Text>  Projects with subtasks restored: {projectsWithRestoredSubtasks.length}</Text>
-			<Text>  Projects without subtasks: {projectsWithoutSubtasks.length}</Text>
-			<Text>  Total subtask connections restored: {totalSubtasksRestored}</Text>
+			<Text>  Projects with tasks restored: {projectsWithRestoredSubtasks.length}</Text>
+			<Text>  Projects without tasks: {projectsWithoutSubtasks.length}</Text>
+			<Text>  Total task connections restored: {totalSubtasksRestored}</Text>
 			<Text></Text>
-			<Text color="green">✓ Migration completed! All subtask connections have been restored.</Text>
+			<Text color="green">✓ Migration completed! All task connections have been restored.</Text>
 		</Box>
 	);
 }

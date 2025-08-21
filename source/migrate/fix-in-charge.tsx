@@ -9,6 +9,14 @@ interface Props {
 	token?: string;
 }
 
+interface ProgressState {
+	currentProject: number;
+	totalProjects: number;
+	currentProjectName: string;
+	phase: 'loading' | 'processing' | 'complete';
+	message: string;
+}
+
 interface ProjectWithMultipleInCharge {
 	project: ProjectSummary;
 	inChargeUsers: Array<{id: string; name: string}>;
@@ -26,6 +34,13 @@ export default function FixInCharge({token}: Props) {
 	const [projectsToFix, setProjectsToFix] = useState<ProjectWithMultipleInCharge[]>([]);
 	const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
 	const [client, setClient] = useState<import('@notionhq/client').Client | null>(null);
+	const [progress, setProgress] = useState<ProgressState>({
+		currentProject: 0,
+		totalProjects: 0,
+		currentProjectName: '',
+		phase: 'loading',
+		message: 'Initializing "In charge" validation...',
+	});
 
 	useEffect(() => {
 		findProjectsWithMultipleInCharge();
@@ -46,6 +61,7 @@ export default function FixInCharge({token}: Props) {
 			const notionService = new NotionService('dummy');
 			notionService.client = notionClient;
 
+			setProgress(prev => ({...prev, message: 'Fetching projects to validate...'}));
 			const projectsResult = await notionService.getProjectsByMigrationStatus('Project to migrate');
 			
 			if (!projectsResult.success) {
@@ -55,11 +71,27 @@ export default function FixInCharge({token}: Props) {
 			}
 
 			const projects = projectsResult.projects || [];
+			setProgress(prev => ({
+				...prev,
+				totalProjects: projects.length,
+				phase: 'processing',
+				message: `Found ${projects.length} project(s) to check`,
+			}));
 			const problematicProjects: ProjectWithMultipleInCharge[] = [];
 			const integrationUserId = '338ba5ec-fba4-45c1-b205-98086fa639a2';
 			let projectsWithNoInCharge = 0;
 
-			for (const project of projects) {
+			for (let i = 0; i < projects.length; i++) {
+				const project = projects[i];
+				const projectSummary = extractProjectSummary(project);
+				
+				setProgress(prev => ({
+					...prev,
+					currentProject: i + 1,
+					currentProjectName: projectSummary.title,
+					message: `Checking "In charge" for: ${projectSummary.title}`,
+				}));
+				
 				const properties = project.properties;
 				const inChargeUsers = properties['In charge']?.people || [];
 
@@ -91,7 +123,6 @@ export default function FixInCharge({token}: Props) {
 				}
 
 				if (inChargeUsers.length > 1) {
-					const projectSummary = extractProjectSummary(project);
 					
 					// Get parent projects information
 					const parentProjects: Array<{id: string; title: string; owner?: string}> = [];
@@ -135,6 +166,12 @@ export default function FixInCharge({token}: Props) {
 				}
 			}
 
+			setProgress(prev => ({
+				...prev,
+				phase: 'complete',
+				message: `Scanning complete: Found ${problematicProjects.length} project(s) needing fixes`,
+			}));
+			
 			setProjectsToFix(problematicProjects);
 			setLoading(false);
 
@@ -216,9 +253,29 @@ export default function FixInCharge({token}: Props) {
 
 
 	if (loading) {
+		if (progress.phase === 'loading') {
+			return (
+				<Box>
+					<Text>{progress.message}</Text>
+				</Box>
+			);
+		}
+		
+		if (progress.phase === 'processing') {
+			return (
+				<Box flexDirection="column">
+					<Text color="blue">Finding projects with multiple "In charge" assignments...</Text>
+					<Text></Text>
+					<Text color="cyan">Progress: {progress.currentProject}/{progress.totalProjects} projects</Text>
+					<Text color="gray">Current: {progress.currentProjectName}</Text>
+					<Text color="yellow">{progress.message}</Text>
+				</Box>
+			);
+		}
+		
 		return (
 			<Box>
-				<Text>Finding projects with multiple "In charge" assignments...</Text>
+				<Text color="green">{progress.message}</Text>
 			</Box>
 		);
 	}

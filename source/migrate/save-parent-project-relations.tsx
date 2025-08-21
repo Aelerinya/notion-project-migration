@@ -13,9 +13,27 @@ interface ProjectWithParents {
 	parentProjects: Array<{id: string; title?: string}>;
 }
 
+interface ProgressState {
+	currentProject: number;
+	totalProjects: number;
+	currentProjectName: string;
+	currentParent: number;
+	totalParents: number;
+	phase: 'loading' | 'processing' | 'complete';
+	message: string;
+}
+
 export default function SaveParentProjectRelations({token}: Props) {
 	const [result, setResult] = useState<MigrationResult & {data?: ProjectWithParents[]} | null>(null);
-	const [loading, setLoading] = useState(true);
+	const [progress, setProgress] = useState<ProgressState>({
+		currentProject: 0,
+		totalProjects: 0,
+		currentProjectName: '',
+		currentParent: 0,
+		totalParents: 0,
+		phase: 'loading',
+		message: 'Initializing...'
+	});
 
 	useEffect(() => {
 		saveParentRelations();
@@ -26,11 +44,13 @@ export default function SaveParentProjectRelations({token}: Props) {
 		
 		if (!client) {
 			setResult({success: false, error});
-			setLoading(false);
+			setProgress(prev => ({...prev, phase: 'complete', message: 'Error: ' + error}));
 			return;
 		}
 
 		try {
+			setProgress(prev => ({...prev, message: 'Fetching projects to migrate...'}));
+			
 			const notionService = new NotionService('dummy');
 			notionService.client = client;
 
@@ -38,28 +58,48 @@ export default function SaveParentProjectRelations({token}: Props) {
 			
 			if (!projectsResult.success) {
 				setResult({success: false, error: projectsResult.error});
-				setLoading(false);
+				setProgress(prev => ({...prev, phase: 'complete', message: 'Error: ' + projectsResult.error}));
 				return;
 			}
 
 			const projects = projectsResult.projects || [];
 			const processedProjects: ProjectWithParents[] = [];
+			
+			setProgress(prev => ({
+				...prev,
+				phase: 'processing',
+				totalProjects: projects.length,
+				message: `Found ${projects.length} project(s) to process`
+			}));
 
-			for (const project of projects) {
+			for (let i = 0; i < projects.length; i++) {
+				const project = projects[i];
 				const projectSummary = extractProjectSummary(project);
 				const properties = project.properties;
 
+				setProgress(prev => ({
+					...prev,
+					currentProject: i + 1,
+					currentProjectName: projectSummary.title,
+					currentParent: 0,
+					totalParents: 0,
+					message: `Processing project: ${projectSummary.title}`
+				}));
+
 				try {
 					// Check if "Parent projects to transfer" is already filled
+					setProgress(prev => ({...prev, message: `Checking existing data for: ${projectSummary.title}`}));
 					const existingTransferText = properties['Parent projects to transfer']?.rich_text?.[0]?.text?.content;
 					if (existingTransferText) {
 						throw new Error(`"Parent projects to transfer" already filled: ${existingTransferText}`);
 					}
 
 					// Get current "Projects" relation
+					setProgress(prev => ({...prev, message: `Reading parent relations for: ${projectSummary.title}`}));
 					const projectsRelation = properties['Projects']?.relation || [];
 
 					if (projectsRelation.length === 0) {
+						setProgress(prev => ({...prev, message: `No parent projects found for: ${projectSummary.title}`}));
 						// No parent projects, skip but track
 						processedProjects.push({
 							project: projectSummary,
@@ -68,10 +108,24 @@ export default function SaveParentProjectRelations({token}: Props) {
 						continue;
 					}
 
+					setProgress(prev => ({
+						...prev,
+						totalParents: projectsRelation.length,
+						message: `Found ${projectsRelation.length} parent project(s) for: ${projectSummary.title}`
+					}));
+
 					// Get parent project details for display
 					const parentProjects: Array<{id: string; title?: string}> = [];
 					
-					for (const parentRef of projectsRelation) {
+					for (let j = 0; j < projectsRelation.length; j++) {
+						const parentRef = projectsRelation[j];
+						
+						setProgress(prev => ({
+							...prev,
+							currentParent: j + 1,
+							message: `Processing parent ${j + 1}/${projectsRelation.length} for: ${projectSummary.title}`
+						}));
+						
 						try {
 							const parentPage = await client.pages.retrieve({page_id: parentRef.id});
 							const parentProps = (parentPage as any).properties;
@@ -95,6 +149,11 @@ export default function SaveParentProjectRelations({token}: Props) {
 						.map((parent: any) => parent.id)
 						.join(', ');
 
+					setProgress(prev => ({
+						...prev, 
+						message: `Saving parent project list for: ${projectSummary.title}`
+					}));
+
 					// Save to "Parent projects to transfer" field
 					await client.pages.update({
 						page_id: project.id,
@@ -110,6 +169,11 @@ export default function SaveParentProjectRelations({token}: Props) {
 							},
 						},
 					});
+
+					setProgress(prev => ({
+						...prev, 
+						message: `✓ Completed ${projectSummary.title} with ${projectsRelation.length} parent project(s)`
+					}));
 
 					processedProjects.push({
 						project: projectSummary,
@@ -139,29 +203,51 @@ export default function SaveParentProjectRelations({token}: Props) {
 				}
 			}
 
+			setProgress(prev => ({
+				...prev,
+				phase: 'complete',
+				message: `✓ Processing complete! ${processedProjects.length} project(s) processed`
+			}));
+
 			setResult({
 				success: true,
 				data: processedProjects,
 			});
-		} catch (error: any) {
-			let errorMessage = 'Failed to save parent project relations';
+		} catch (error: unknown) {
+			const errorMessage = error instanceof Error ? error.message : 'Failed to save parent project relations';
 			
-			if (error?.code === 'unauthorized') {
-				errorMessage = 'Invalid API token or insufficient permissions';
-			} else if (error?.message) {
-				errorMessage = error.message;
-			}
+			setProgress(prev => ({
+				...prev,
+				phase: 'complete',
+				message: `Error: ${errorMessage}`
+			}));
 
 			setResult({success: false, error: errorMessage});
-		} finally {
-			setLoading(false);
 		}
 	};
 
-	if (loading) {
+	// Show real-time progress during processing
+	if (progress.phase !== 'complete') {
 		return (
-			<Box>
-				<Text>Saving parent project relations...</Text>
+			<Box flexDirection="column">
+				<Text color="blue">Save Parent Project Relations</Text>
+				<Text></Text>
+				
+				{progress.totalProjects > 0 && (
+					<Text>Progress: {progress.currentProject}/{progress.totalProjects} projects</Text>
+				)}
+				
+				{progress.currentProjectName && (
+					<>
+						<Text color="cyan">Current: {progress.currentProjectName}</Text>
+						{progress.totalParents > 0 && (
+							<Text color="gray">  Parents: {progress.currentParent}/{progress.totalParents}</Text>
+						)}
+					</>
+				)}
+				
+				<Text></Text>
+				<Text>{progress.message}</Text>
 			</Box>
 		);
 	}

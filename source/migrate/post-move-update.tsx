@@ -8,6 +8,16 @@ interface Props {
 	token?: string;
 }
 
+interface ProgressState {
+	currentProject: number;
+	totalProjects: number;
+	currentProjectName: string;
+	currentUpdate: number;
+	totalUpdates: number;
+	phase: 'loading' | 'processing' | 'complete';
+	message: string;
+}
+
 interface UpdatedProject {
 	project: ProjectSummary;
 	updates: string[];
@@ -16,6 +26,15 @@ interface UpdatedProject {
 export default function PostMoveUpdate({token}: Props) {
 	const [result, setResult] = useState<MigrationResult & {data?: UpdatedProject[]} | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [progress, setProgress] = useState<ProgressState>({
+		currentProject: 0,
+		totalProjects: 0,
+		currentProjectName: '',
+		currentUpdate: 0,
+		totalUpdates: 0,
+		phase: 'loading',
+		message: 'Initializing property updates...',
+	});
 
 	useEffect(() => {
 		updateProjectProperties();
@@ -34,6 +53,7 @@ export default function PostMoveUpdate({token}: Props) {
 			const notionService = new NotionService('dummy');
 			notionService.client = client;
 
+			setProgress(prev => ({...prev, message: 'Fetching projects from Projects database...'}));
 			const projectsResult = await notionService.getProjectsInProjectsDB('Project to migrate');
 			
 			if (!projectsResult.success) {
@@ -43,16 +63,51 @@ export default function PostMoveUpdate({token}: Props) {
 			}
 
 			const projects = projectsResult.projects || [];
+			setProgress(prev => ({
+				...prev,
+				totalProjects: projects.length,
+				phase: 'processing',
+				message: `Found ${projects.length} project(s) to update`,
+			}));
 			const updatedProjects: UpdatedProject[] = [];
 
-			for (const project of projects) {
+			for (let i = 0; i < projects.length; i++) {
+				const project = projects[i];
 				const projectSummary = extractProjectSummary(project);
+				
+				setProgress(prev => ({
+					...prev,
+					currentProject: i + 1,
+					currentProjectName: projectSummary.title,
+					currentUpdate: 0,
+					totalUpdates: 0,
+					message: `Updating properties for: ${projectSummary.title}`,
+				}));
+				
 				const properties = project.properties;
 				const updatedProperties: any = {};
 				const updates: string[] = [];
 
+				// Count potential updates first
+				let potentialUpdates = 0;
+				if (properties.Status?.status?.name && ['Done', 'Cancelled'].includes(properties.Status.status.name)) potentialUpdates++;
+				if (properties['Task/project/activity']?.select?.name) potentialUpdates++;
+				if (properties.Importance?.select?.name) potentialUpdates++;
+				if (properties['In charge']?.people && properties['In charge'].people.length === 1) potentialUpdates++;
+				if (properties.Deadline?.date) potentialUpdates++;
+				
+				setProgress(prev => ({...prev, totalUpdates: potentialUpdates}));
+				let currentUpdateIndex = 0;
+
 				// Status mapping: Done → Completed, Cancelled → Cancelled
 				if (properties.Status?.status?.name) {
+					currentUpdateIndex++;
+					setProgress(prev => ({
+						...prev,
+						currentUpdate: currentUpdateIndex,
+						message: `Updating Status property (${currentUpdateIndex}/${potentialUpdates})`,
+					}));
+					
 					const currentStatus = properties.Status.status.name;
 					if (currentStatus === 'Done') {
 						updatedProperties.Status = { status: { name: 'Completed' } };
@@ -65,6 +120,13 @@ export default function PostMoveUpdate({token}: Props) {
 
 				// Task/project/activity → Type (rename property)
 				if (properties['Task/project/activity']?.select?.name) {
+					currentUpdateIndex++;
+					setProgress(prev => ({
+						...prev,
+						currentUpdate: currentUpdateIndex,
+						message: `Updating Type property (${currentUpdateIndex}/${potentialUpdates})`,
+					}));
+					
 					updatedProperties.Type = {
 						select: { name: properties['Task/project/activity'].select.name }
 					};
@@ -73,6 +135,13 @@ export default function PostMoveUpdate({token}: Props) {
 
 				// Importance → Impact (rename property, keep star ratings)
 				if (properties.Importance?.select?.name) {
+					currentUpdateIndex++;
+					setProgress(prev => ({
+						...prev,
+						currentUpdate: currentUpdateIndex,
+						message: `Updating Impact property (${currentUpdateIndex}/${potentialUpdates})`,
+					}));
+					
 					updatedProperties.Impact = {
 						select: { name: properties.Importance.select.name }
 					};
@@ -89,6 +158,13 @@ export default function PostMoveUpdate({token}: Props) {
 
 				// In charge → Owner (only if single person)
 				if (properties['In charge']?.people && properties['In charge'].people.length === 1) {
+					currentUpdateIndex++;
+					setProgress(prev => ({
+						...prev,
+						currentUpdate: currentUpdateIndex,
+						message: `Updating Owner property (${currentUpdateIndex}/${potentialUpdates})`,
+					}));
+					
 					updatedProperties.Owner = {
 						people: [{ id: properties['In charge'].people[0].id }]
 					};
@@ -97,6 +173,13 @@ export default function PostMoveUpdate({token}: Props) {
 
 				// Deadline → Start and end dates (approximate)
 				if (properties.Deadline?.date) {
+					currentUpdateIndex++;
+					setProgress(prev => ({
+						...prev,
+						currentUpdate: currentUpdateIndex,
+						message: `Updating Start and end dates property (${currentUpdateIndex}/${potentialUpdates})`,
+					}));
+					
 					updatedProperties['Start and end dates (approximate)'] = {
 						date: properties.Deadline.date
 					};
@@ -117,6 +200,12 @@ export default function PostMoveUpdate({token}: Props) {
 				});
 			}
 
+			setProgress(prev => ({
+				...prev,
+				phase: 'complete',
+				message: `Property updates complete: ${projects.length} project(s) processed`,
+			}));
+			
 			setResult({
 				success: true,
 				data: updatedProjects,
@@ -137,9 +226,32 @@ export default function PostMoveUpdate({token}: Props) {
 	};
 
 	if (loading) {
+		if (progress.phase === 'loading') {
+			return (
+				<Box>
+					<Text>{progress.message}</Text>
+				</Box>
+			);
+		}
+		
+		if (progress.phase === 'processing') {
+			return (
+				<Box flexDirection="column">
+					<Text color="blue">Updating project properties for Projects database schema...</Text>
+					<Text></Text>
+					<Text color="cyan">Project Progress: {progress.currentProject}/{progress.totalProjects}</Text>
+					<Text color="gray">Current: {progress.currentProjectName}</Text>
+					{progress.totalUpdates > 0 && (
+						<Text color="cyan">Property Updates: {progress.currentUpdate}/{progress.totalUpdates}</Text>
+					)}
+					<Text color="yellow">{progress.message}</Text>
+				</Box>
+			);
+		}
+		
 		return (
 			<Box>
-				<Text>Updating project properties for Projects database schema...</Text>
+				<Text color="green">{progress.message}</Text>
 			</Box>
 		);
 	}

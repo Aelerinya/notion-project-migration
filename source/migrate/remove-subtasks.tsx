@@ -8,6 +8,14 @@ interface Props {
 	token?: string;
 }
 
+interface ProgressState {
+	currentProject: number;
+	totalProjects: number;
+	currentProjectName: string;
+	phase: 'loading' | 'processing' | 'complete';
+	message: string;
+}
+
 interface ProcessedProject {
 	project: ProjectSummary;
 	subtasksRemoved: number;
@@ -16,6 +24,13 @@ interface ProcessedProject {
 export default function RemoveSubtasks({token}: Props) {
 	const [result, setResult] = useState<MigrationResult & {data?: ProcessedProject[]} | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [progress, setProgress] = useState<ProgressState>({
+		currentProject: 0,
+		totalProjects: 0,
+		currentProjectName: '',
+		phase: 'loading',
+		message: 'Initializing subtask removal...',
+	});
 
 	useEffect(() => {
 		removeSubtaskRelations();
@@ -34,6 +49,7 @@ export default function RemoveSubtasks({token}: Props) {
 			const notionService = new NotionService('dummy');
 			notionService.client = client;
 
+			setProgress(prev => ({...prev, message: 'Fetching projects to process...'}));
 			const projectsResult = await notionService.getProjectsByMigrationStatus('Project to migrate');
 			
 			if (!projectsResult.success) {
@@ -43,10 +59,25 @@ export default function RemoveSubtasks({token}: Props) {
 			}
 
 			const projects = projectsResult.projects || [];
+			setProgress(prev => ({
+				...prev,
+				totalProjects: projects.length,
+				phase: 'processing',
+				message: `Found ${projects.length} project(s) to process`,
+			}));
 			const processedProjects: ProcessedProject[] = [];
 
-			for (const project of projects) {
+			for (let i = 0; i < projects.length; i++) {
+				const project = projects[i];
 				const projectSummary = extractProjectSummary(project);
+				
+				setProgress(prev => ({
+					...prev,
+					currentProject: i + 1,
+					currentProjectName: projectSummary.title,
+					message: `Removing subtasks from: ${projectSummary.title}`,
+				}));
+				
 				const properties = project.properties;
 
 				// Get current "Subtask" relation count
@@ -69,6 +100,12 @@ export default function RemoveSubtasks({token}: Props) {
 				});
 			}
 
+			setProgress(prev => ({
+				...prev,
+				phase: 'complete',
+				message: `Subtask removal complete: ${projects.length} project(s) processed`,
+			}));
+			
 			setResult({
 				success: true,
 				data: processedProjects,
@@ -89,9 +126,29 @@ export default function RemoveSubtasks({token}: Props) {
 	};
 
 	if (loading) {
+		if (progress.phase === 'loading') {
+			return (
+				<Box>
+					<Text>{progress.message}</Text>
+				</Box>
+			);
+		}
+		
+		if (progress.phase === 'processing') {
+			return (
+				<Box flexDirection="column">
+					<Text color="blue">Removing subtask relations from projects...</Text>
+					<Text></Text>
+					<Text color="cyan">Progress: {progress.currentProject}/{progress.totalProjects} projects</Text>
+					<Text color="gray">Current: {progress.currentProjectName}</Text>
+					<Text color="yellow">{progress.message}</Text>
+				</Box>
+			);
+		}
+		
 		return (
 			<Box>
-				<Text>Removing subtask relations from projects...</Text>
+				<Text color="green">{progress.message}</Text>
 			</Box>
 		);
 	}

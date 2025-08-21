@@ -8,9 +8,22 @@ interface Props {
 	token?: string;
 }
 
+interface ProgressState {
+	currentCheck: number;
+	totalChecks: number;
+	phase: 'loading' | 'processing' | 'complete';
+	message: string;
+}
+
 export default function VerifyMove({token}: Props) {
 	const [result, setResult] = useState<MigrationResult & {data?: ProjectSummary[]} | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [progress, setProgress] = useState<ProgressState>({
+		currentCheck: 0,
+		totalChecks: 1,
+		phase: 'loading',
+		message: 'Initializing move verification...',
+	});
 
 	useEffect(() => {
 		verifyProjectsMove();
@@ -29,6 +42,12 @@ export default function VerifyMove({token}: Props) {
 			const notionService = new NotionService('dummy');
 			notionService.client = client;
 
+			setProgress(prev => ({
+				...prev,
+				phase: 'processing',
+				message: 'Searching Projects database for moved projects...'
+			}));
+
 			// Query Projects database for projects with Migration status = "Project to migrate"
 			const projectsResult = await notionService.getProjectsInProjectsDB('Project to migrate');
 			
@@ -39,6 +58,11 @@ export default function VerifyMove({token}: Props) {
 			}
 
 			const projects = projectsResult.projects || [];
+			setProgress(prev => ({
+				...prev,
+				currentCheck: 1,
+				message: `Found ${projects.length} project(s) in Projects database`,
+			}));
 			const movedProjects: ProjectSummary[] = projects.map(project => {
 				// Extract project summary from Projects DB (schema might be different)
 				const properties = project.properties;
@@ -60,6 +84,12 @@ export default function VerifyMove({token}: Props) {
 				};
 			});
 
+			setProgress(prev => ({
+				...prev,
+				phase: 'complete',
+				message: `Verification complete: Found ${projects.length} moved project(s)`,
+			}));
+			
 			setResult({
 				success: true,
 				data: movedProjects,
@@ -80,9 +110,28 @@ export default function VerifyMove({token}: Props) {
 	};
 
 	if (loading) {
+		if (progress.phase === 'loading') {
+			return (
+				<Box>
+					<Text>{progress.message}</Text>
+				</Box>
+			);
+		}
+		
+		if (progress.phase === 'processing') {
+			return (
+				<Box flexDirection="column">
+					<Text color="blue">Verifying projects have been moved to Projects database...</Text>
+					<Text></Text>
+					<Text color="cyan">Progress: {progress.currentCheck}/{progress.totalChecks} checks</Text>
+					<Text color="yellow">{progress.message}</Text>
+				</Box>
+			);
+		}
+		
 		return (
 			<Box>
-				<Text>Verifying projects have been moved to Projects database...</Text>
+				<Text color="green">{progress.message}</Text>
 			</Box>
 		);
 	}

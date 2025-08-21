@@ -8,9 +8,24 @@ interface Props {
 	token?: string;
 }
 
+interface ProgressState {
+	currentProject: number;
+	totalProjects: number;
+	currentProjectName: string;
+	phase: 'loading' | 'processing' | 'complete';
+	message: string;
+}
+
 export default function InitialValidation({token}: Props) {
 	const [result, setResult] = useState<MigrationResult & {data?: ValidationResult[]} | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [progress, setProgress] = useState<ProgressState>({
+		currentProject: 0,
+		totalProjects: 0,
+		currentProjectName: '',
+		phase: 'loading',
+		message: 'Initializing validation...',
+	});
 
 	useEffect(() => {
 		validateProjects();
@@ -29,6 +44,7 @@ export default function InitialValidation({token}: Props) {
 			const notionService = new NotionService('dummy'); // We'll use the client directly
 			notionService.client = client;
 
+			setProgress(prev => ({...prev, message: 'Fetching projects to validate...'}));
 			// Get all projects with Migration status = "Project to migrate"
 			const projectsResult = await notionService.getProjectsByMigrationStatus('Project to migrate');
 			
@@ -39,15 +55,36 @@ export default function InitialValidation({token}: Props) {
 			}
 
 			const projects = projectsResult.projects || [];
+			setProgress(prev => ({
+				...prev,
+				totalProjects: projects.length,
+				phase: 'processing',
+				message: `Found ${projects.length} project(s) to validate`,
+			}));
 			const validationResults: ValidationResult[] = [];
 
 			// Validate each project
-			for (const project of projects) {
+			for (let i = 0; i < projects.length; i++) {
+				const project = projects[i];
 				const projectSummary = extractProjectSummary(project);
+				
+				setProgress(prev => ({
+					...prev,
+					currentProject: i + 1,
+					currentProjectName: projectSummary.title,
+					message: `Validating project: ${projectSummary.title}`,
+				}));
+				
 				const validation = await validateProject(client, project, projectSummary);
 				validationResults.push(validation);
 			}
 
+			setProgress(prev => ({
+				...prev,
+				phase: 'complete',
+				message: `Validation complete: ${projects.length} project(s) validated`,
+			}));
+			
 			setResult({
 				success: true,
 				data: validationResults,
@@ -125,9 +162,29 @@ export default function InitialValidation({token}: Props) {
 	};
 
 	if (loading) {
+		if (progress.phase === 'loading') {
+			return (
+				<Box>
+					<Text>{progress.message}</Text>
+				</Box>
+			);
+		}
+		
+		if (progress.phase === 'processing') {
+			return (
+				<Box flexDirection="column">
+					<Text color="blue">Validating projects for migration...</Text>
+					<Text></Text>
+					<Text color="cyan">Progress: {progress.currentProject}/{progress.totalProjects} projects</Text>
+					<Text color="gray">Current: {progress.currentProjectName}</Text>
+					<Text color="yellow">{progress.message}</Text>
+				</Box>
+			);
+		}
+		
 		return (
 			<Box>
-				<Text>Validating projects for migration...</Text>
+				<Text color="green">{progress.message}</Text>
 			</Box>
 		);
 	}

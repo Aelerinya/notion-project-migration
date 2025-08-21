@@ -13,9 +13,27 @@ interface ProjectWithSubtasks {
 	subtasks: Array<{id: string; title?: string}>;
 }
 
+interface ProgressState {
+	currentProject: number;
+	totalProjects: number;
+	currentProjectName: string;
+	currentSubtask: number;
+	totalSubtasks: number;
+	phase: 'loading' | 'processing' | 'complete';
+	message: string;
+}
+
 export default function SaveSubtasksRelations({token}: Props) {
 	const [result, setResult] = useState<MigrationResult & {data?: ProjectWithSubtasks[]} | null>(null);
-	const [loading, setLoading] = useState(true);
+	const [progress, setProgress] = useState<ProgressState>({
+		currentProject: 0,
+		totalProjects: 0,
+		currentProjectName: '',
+		currentSubtask: 0,
+		totalSubtasks: 0,
+		phase: 'loading',
+		message: 'Initializing...'
+	});
 
 	useEffect(() => {
 		saveSubtaskRelations();
@@ -26,11 +44,13 @@ export default function SaveSubtasksRelations({token}: Props) {
 		
 		if (!client) {
 			setResult({success: false, error});
-			setLoading(false);
+			setProgress(prev => ({...prev, phase: 'complete', message: 'Error: ' + error}));
 			return;
 		}
 
 		try {
+			setProgress(prev => ({...prev, message: 'Fetching projects to migrate...'}));
+			
 			const notionService = new NotionService('dummy');
 			notionService.client = client;
 
@@ -38,18 +58,36 @@ export default function SaveSubtasksRelations({token}: Props) {
 			
 			if (!projectsResult.success) {
 				setResult({success: false, error: projectsResult.error});
-				setLoading(false);
+				setProgress(prev => ({...prev, phase: 'complete', message: 'Error: ' + projectsResult.error}));
 				return;
 			}
 
 			const projects = projectsResult.projects || [];
 			const processedProjects: ProjectWithSubtasks[] = [];
+			
+			setProgress(prev => ({
+				...prev,
+				phase: 'processing',
+				totalProjects: projects.length,
+				message: `Found ${projects.length} project(s) to process`
+			}));
 
-			for (const project of projects) {
+			for (let i = 0; i < projects.length; i++) {
+				const project = projects[i];
 				const projectSummary = extractProjectSummary(project);
+
+				setProgress(prev => ({
+					...prev,
+					currentProject: i + 1,
+					currentProjectName: projectSummary.title,
+					currentSubtask: 0,
+					totalSubtasks: 0,
+					message: `Processing project: ${projectSummary.title}`
+				}));
 
 				try {
 					// Get ALL subtask relations using pagination if needed
+					setProgress(prev => ({...prev, message: `Retrieving subtasks for: ${projectSummary.title}`}));
 					const subtaskResult = await getAllRelationIds(client, project.id, 'Subtask');
 					if (!subtaskResult.success) {
 						throw new Error(`Failed to retrieve subtasks: ${subtaskResult.error}`);
@@ -58,6 +96,7 @@ export default function SaveSubtasksRelations({token}: Props) {
 					const subtaskIds = subtaskResult.relationIds;
 
 					if (subtaskIds.length === 0) {
+						setProgress(prev => ({...prev, message: `No subtasks found for: ${projectSummary.title}`}));
 						// No subtasks, skip but track
 						processedProjects.push({
 							project: projectSummary,
@@ -66,10 +105,29 @@ export default function SaveSubtasksRelations({token}: Props) {
 						continue;
 					}
 
+					setProgress(prev => ({
+						...prev,
+						totalSubtasks: subtaskIds.length,
+						message: `Found ${subtaskIds.length} subtask(s) for: ${projectSummary.title}`
+					}));
+
 					// Get subtask details and update them
 					const subtasks: Array<{id: string; title?: string}> = [];
 					
-					for (const subtaskId of subtaskIds) {
+					for (let j = 0; j < subtaskIds.length; j++) {
+						const subtaskId = subtaskIds[j];
+						
+						// Skip if subtaskId is undefined (shouldn't happen but type safety)
+						if (!subtaskId) {
+							continue;
+						}
+						
+						setProgress(prev => ({
+							...prev,
+							currentSubtask: j + 1,
+							message: `Processing subtask ${j + 1}/${subtaskIds.length} for: ${projectSummary.title}`
+						}));
+						
 						try {
 							const subtaskPage = await client.pages.retrieve({page_id: subtaskId});
 							const subtaskProps = (subtaskPage as any).properties;
@@ -113,6 +171,11 @@ export default function SaveSubtasksRelations({token}: Props) {
 					// Create comma-separated list of subtask IDs
 					const subtaskIdsList = subtaskIds.join(', ');
 
+					setProgress(prev => ({
+						...prev, 
+						message: `Saving subtask list for: ${projectSummary.title}`
+					}));
+
 					// Save to "Subtasks to transfer" field
 					await client.pages.update({
 						page_id: project.id,
@@ -128,6 +191,11 @@ export default function SaveSubtasksRelations({token}: Props) {
 							},
 						},
 					});
+
+					setProgress(prev => ({
+						...prev, 
+						message: `✓ Completed ${projectSummary.title} with ${subtaskIds.length} subtask(s)`
+					}));
 
 					processedProjects.push({
 						project: projectSummary,
@@ -157,29 +225,51 @@ export default function SaveSubtasksRelations({token}: Props) {
 				}
 			}
 
+			setProgress(prev => ({
+				...prev,
+				phase: 'complete',
+				message: `✓ Processing complete! ${processedProjects.length} project(s) processed`
+			}));
+
 			setResult({
 				success: true,
 				data: processedProjects,
 			});
-		} catch (error: any) {
-			let errorMessage = 'Failed to save subtask relations';
+		} catch (error: unknown) {
+			const errorMessage = error instanceof Error ? error.message : 'Failed to save subtask relations';
 			
-			if (error?.code === 'unauthorized') {
-				errorMessage = 'Invalid API token or insufficient permissions';
-			} else if (error?.message) {
-				errorMessage = error.message;
-			}
+			setProgress(prev => ({
+				...prev,
+				phase: 'complete',
+				message: `Error: ${errorMessage}`
+			}));
 
 			setResult({success: false, error: errorMessage});
-		} finally {
-			setLoading(false);
 		}
 	};
 
-	if (loading) {
+	// Show real-time progress during processing
+	if (progress.phase !== 'complete') {
 		return (
-			<Box>
-				<Text>Saving subtask relations and updating subtask migration status...</Text>
+			<Box flexDirection="column">
+				<Text color="blue">Save Subtasks Relations</Text>
+				<Text></Text>
+				
+				{progress.totalProjects > 0 && (
+					<Text>Progress: {progress.currentProject}/{progress.totalProjects} projects</Text>
+				)}
+				
+				{progress.currentProjectName && (
+					<>
+						<Text color="cyan">Current: {progress.currentProjectName}</Text>
+						{progress.totalSubtasks > 0 && (
+							<Text color="gray">  Subtasks: {progress.currentSubtask}/{progress.totalSubtasks}</Text>
+						)}
+					</>
+				)}
+				
+				<Text></Text>
+				<Text>{progress.message}</Text>
 			</Box>
 		);
 	}
