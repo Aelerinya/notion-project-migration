@@ -11,9 +11,10 @@ type Props = {
 	subcommand?: string;
 	token?: string;
 	json?: boolean;
+	subtasksN?: number;
 };
 
-export default function App({command, subcommand, token, json}: Props) {
+export default function App({command, subcommand, token, json, subtasksN}: Props) {
 	if (command === 'test-connection') {
 		return <TestConnection token={token} />;
 	}
@@ -31,7 +32,7 @@ export default function App({command, subcommand, token, json}: Props) {
 	}
 
 	if (command === 'create-test-project') {
-		return <CreateTestProject token={token} />;
+		return <CreateTestProject token={token} subtasksN={subtasksN} />;
 	}
 
 	if (command === 'migrate') {

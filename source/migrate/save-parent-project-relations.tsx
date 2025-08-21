@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {Text, Box} from 'ink';
 import {NotionService} from '../notion-service.js';
-import {setupNotionClient, extractProjectSummary, displayProjectSummary, formatProjectUrl} from './utils.js';
+import {setupNotionClient, extractProjectSummary, displayProjectSummary} from './utils.js';
 import {MigrationResult, ProjectSummary} from './types.js';
 
 interface Props {

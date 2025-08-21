@@ -6,18 +6,22 @@ import {MigrationResult} from './types.js';
 
 interface Props {
 	token?: string;
+	subtasksN?: number;
+}
+
+interface CreatedSubtask {
+	id: string;
+	url: string;
+	title: string;
 }
 
 interface CreatedProject {
 	projectId: string;
 	projectUrl: string;
-	subtask1Id: string;
-	subtask1Url: string;
-	subtask2Id: string;
-	subtask2Url: string;
+	subtasks: CreatedSubtask[];
 }
 
-export default function CreateTestProject({token}: Props) {
+export default function CreateTestProject({token, subtasksN = 2}: Props) {
 	const [result, setResult] = useState<MigrationResult & {data?: CreatedProject} | null>(null);
 	const [loading, setLoading] = useState(true);
 
@@ -121,123 +125,75 @@ export default function CreateTestProject({token}: Props) {
 				},
 			});
 
-			// Create first test subtask
-			const subtask1 = await client.pages.create({
-				parent: {
-					database_id: DATABASE_IDS.TASKS,
-				},
-				properties: {
-					'Name': {
-						title: [
-							{
-								text: {
-									content: `Test Subtask 1 - ${timestamp}`,
+			// Create test subtasks dynamically
+			const createdSubtasks: CreatedSubtask[] = [];
+			
+			for (let i = 1; i <= subtasksN; i++) {
+				const subtask = await client.pages.create({
+					parent: {
+						database_id: DATABASE_IDS.TASKS,
+					},
+					properties: {
+						'Name': {
+							title: [
+								{
+									text: {
+										content: `Test Subtask ${i} - ${timestamp}`,
+									},
 								},
+							],
+						},
+						'Task/project/activity': {
+							select: {
+								name: 'Task',
 							},
-						],
-					},
-					'Task/project/activity': {
-						select: {
-							name: 'Task',
 						},
-					},
-					'Status': {
-						status: {
-							name: 'Done',
+						'Status': {
+							status: {
+								name: 'Done',
+							},
 						},
-					},
-					'Duration (h)': {
-						number: 2,
-					},
-					'Cost (k€)': {
-						number: 0.5,
-					},
-					'Team': {
-						select: {
-							name: 'R&D',
+						'Duration (h)': {
+							number: 1 + (i * 0.5), // Vary duration: 1.5, 2, 2.5, etc.
 						},
-					},
-					'Comments & updates': {
-						rich_text: [
-							{
-								text: {
-									content: 'Test subtask 1 created for migration testing purposes.',
+						'Cost (k€)': {
+							number: 0.2 + (i * 0.1), // Vary cost: 0.3, 0.4, 0.5, etc.
+						},
+						'Team': {
+							select: {
+								name: 'R&D',
+							},
+						},
+						'Comments & updates': {
+							rich_text: [
+								{
+									text: {
+										content: `Test subtask ${i} created for migration testing purposes.`,
+									},
 								},
-							},
-						],
+							],
+						},
+						'Parent item': {
+							relation: [
+								{
+									id: testProject.id,
+								},
+							],
+						},
 					},
-					'Parent item': {
-						relation: [
-							{
-								id: testProject.id,
-							},
-						],
-					},
-				},
-			});
+				});
 
-			// Create second test subtask
-			const subtask2 = await client.pages.create({
-				parent: {
-					database_id: DATABASE_IDS.TASKS,
-				},
-				properties: {
-					'Name': {
-						title: [
-							{
-								text: {
-									content: `Test Subtask 2 - ${timestamp}`,
-								},
-							},
-						],
-					},
-					'Task/project/activity': {
-						select: {
-							name: 'Task',
-						},
-					},
-					'Status': {
-						status: {
-							name: 'Done',
-						},
-					},
-					'Duration (h)': {
-						number: 1.5,
-					},
-					'Cost (k€)': {
-						number: 0.3,
-					},
-					'Team': {
-						select: {
-							name: 'R&D',
-						},
-					},
-					'Comments & updates': {
-						rich_text: [
-							{
-								text: {
-									content: 'Test subtask 2 created for migration testing purposes.',
-								},
-							},
-						],
-					},
-					'Parent item': {
-						relation: [
-							{
-								id: testProject.id,
-							},
-						],
-					},
-				},
-			});
+				createdSubtasks.push({
+					id: subtask.id,
+					url: formatProjectUrl(subtask.id),
+					title: `Test Subtask ${i} - ${timestamp}`,
+				});
+			}
 
 			const projectData: CreatedProject = {
 				projectId: testProject.id,
 				projectUrl: formatProjectUrl(testProject.id),
-				subtask1Id: subtask1.id,
-				subtask1Url: formatProjectUrl(subtask1.id),
-				subtask2Id: subtask2.id,
-				subtask2Url: formatProjectUrl(subtask2.id),
+				subtasks: createdSubtasks,
 			};
 
 			setResult({
@@ -287,13 +243,16 @@ export default function CreateTestProject({token}: Props) {
 			<Text>  ID: {data?.projectId}</Text>
 			<Text>  URL: {data?.projectUrl}</Text>
 			<Text></Text>
-			<Text color="blue">Subtask 1:</Text>
-			<Text>  ID: {data?.subtask1Id}</Text>
-			<Text>  URL: {data?.subtask1Url}</Text>
-			<Text></Text>
-			<Text color="blue">Subtask 2:</Text>
-			<Text>  ID: {data?.subtask2Id}</Text>
-			<Text>  URL: {data?.subtask2Url}</Text>
+			<Text color="blue">Subtasks ({data?.subtasks.length || 0}):</Text>
+			{data?.subtasks.map((subtask, index) => (
+				<Box key={subtask.id} flexDirection="column" marginLeft={2}>
+					<Text color="cyan">Subtask {index + 1}:</Text>
+					<Text>  Title: {subtask.title}</Text>
+					<Text>  ID: {subtask.id}</Text>
+					<Text>  URL: {subtask.url}</Text>
+					{index < (data.subtasks.length - 1) && <Text></Text>}
+				</Box>
+			))}
 			<Text></Text>
 			<Text color="green">✓ Test project created with all proper properties and relations</Text>
 		</Box>

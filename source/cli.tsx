@@ -32,8 +32,9 @@ const cli = meow(
 		relink-subtasks              Step 9: Restore subtask links
 
 	Options
-		--token  Notion API token (or set NOTION_TOKEN env var)
-		--json   Save raw JSON response to schema/ directory
+		--token        Notion API token (or set NOTION_TOKEN env var)
+		--json         Save raw JSON response to schema/ directory
+		--subtasks-n   Number of subtasks to create (for create-test-project, default: 2)
 
 	Examples
 	  $ notion-project-migration test-connection
@@ -41,7 +42,7 @@ const cli = meow(
 	  $ notion-project-migration schema projects --json --token=secret_...
 	  $ notion-project-migration migrate-test --token=secret_...
 	  $ notion-project-migration list-users --token=secret_...
-	  $ notion-project-migration create-test-project --token=secret_...
+	  $ notion-project-migration create-test-project --token=secret_... --subtasks-n=3
 	  $ notion-project-migration migrate initial-validation --token=secret_...
 	  $ notion-project-migration migrate fix-in-charge --token=secret_...
 `,
@@ -54,8 +55,12 @@ const cli = meow(
 			json: {
 				type: 'boolean',
 			},
+			subtasksN: {
+				type: 'number',
+				default: 2,
+			},
 		},
 	},
 );
 
-render(<App command={cli.input[0]} subcommand={cli.input[1]} token={cli.flags.token} json={cli.flags.json} />);
+render(<App command={cli.input[0]} subcommand={cli.input[1]} token={cli.flags.token} json={cli.flags.json} subtasksN={cli.flags.subtasksN} />);

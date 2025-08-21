@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {Text, Box} from 'ink';
 import {NotionService} from '../notion-service.js';
-import {setupNotionClient, extractProjectSummary, displayProjectSummary} from './utils.js';
+import {setupNotionClient, extractProjectSummary, displayProjectSummary, getAllRelationIds} from './utils.js';
 import {MigrationResult, ProjectSummary} from './types.js';
 
 interface Props {
@@ -47,19 +47,17 @@ export default function SaveSubtasksRelations({token}: Props) {
 
 			for (const project of projects) {
 				const projectSummary = extractProjectSummary(project);
-				const properties = project.properties;
 
 				try {
-					// Check again that subtask property doesn't have has_more
-					const subtaskRelation = properties['Subtask'] as any;
-					if (subtaskRelation?.has_more) {
-						throw new Error('Project has too many subtasks (pagination limit exceeded). Cannot proceed.');
+					// Get ALL subtask relations using pagination if needed
+					const subtaskResult = await getAllRelationIds(client, project.id, 'Subtask');
+					if (!subtaskResult.success) {
+						throw new Error(`Failed to retrieve subtasks: ${subtaskResult.error}`);
 					}
+					
+					const subtaskIds = subtaskResult.relationIds;
 
-					// Get current "Subtask" relation
-					const subtaskRelations = subtaskRelation?.relation || [];
-
-					if (subtaskRelations.length === 0) {
+					if (subtaskIds.length === 0) {
 						// No subtasks, skip but track
 						processedProjects.push({
 							project: projectSummary,
@@ -71,21 +69,21 @@ export default function SaveSubtasksRelations({token}: Props) {
 					// Get subtask details and update them
 					const subtasks: Array<{id: string; title?: string}> = [];
 					
-					for (const subtaskRef of subtaskRelations) {
+					for (const subtaskId of subtaskIds) {
 						try {
-							const subtaskPage = await client.pages.retrieve({page_id: subtaskRef.id});
+							const subtaskPage = await client.pages.retrieve({page_id: subtaskId});
 							const subtaskProps = (subtaskPage as any).properties;
 							const subtaskTitle = subtaskProps.Name?.title?.[0]?.plain_text || 'Untitled';
 							
 							subtasks.push({
-								id: subtaskRef.id,
+								id: subtaskId,
 								title: subtaskTitle,
 							});
 
 							// Update subtask's Migration status to "Subtask to relink"
 							// and set "Parent projects to transfer" to the project ID
 							await client.pages.update({
-								page_id: subtaskRef.id,
+								page_id: subtaskId,
 								properties: {
 									'Migration status': {
 										select: {
@@ -106,14 +104,14 @@ export default function SaveSubtasksRelations({token}: Props) {
 						} catch (error) {
 							// If we can't retrieve/update subtask, still save the ID
 							subtasks.push({
-								id: subtaskRef.id,
+								id: subtaskId,
 								title: 'Unknown Subtask (error updating)',
 							});
 						}
 					}
 
 					// Create comma-separated list of subtask IDs
-					const subtaskIdsList = subtaskRelations.map((subtask: any) => subtask.id).join(', ');
+					const subtaskIdsList = subtaskIds.join(', ');
 
 					// Save to "Subtasks to transfer" field
 					await client.pages.update({

@@ -57,7 +57,6 @@ export default function FixInCharge({token}: Props) {
 			const projects = projectsResult.projects || [];
 			const problematicProjects: ProjectWithMultipleInCharge[] = [];
 			const integrationUserId = '338ba5ec-fba4-45c1-b205-98086fa639a2';
-			const integrationUserName = "Lucie's integration for migrations and scripts";
 			let projectsWithNoInCharge = 0;
 
 			for (const project of projects) {
@@ -107,7 +106,7 @@ export default function FixInCharge({token}: Props) {
 							const inChargeProperty = parentProps['Owner'];
 							let owner = 'Unknown Owner';
 							if (inChargeProperty && inChargeProperty.people && inChargeProperty.people.length > 0) {
-								owner = inChargeProperty.people[0].name || 'Unknown User';
+								owner = inChargeProperty.people[0]?.name || 'Unknown User';
 							}
 							
 							parentProjects.push({

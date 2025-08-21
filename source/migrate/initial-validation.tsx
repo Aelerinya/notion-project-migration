@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {Text, Box} from 'ink';
 import {NotionService} from '../notion-service.js';
-import {setupNotionClient, extractProjectSummary, displayProjectSummary} from './utils.js';
+import {setupNotionClient, extractProjectSummary, displayProjectSummary, getAllRelationIds} from './utils.js';
 import {MigrationResult, ValidationResult} from './types.js';
 
 interface Props {
@@ -89,10 +89,18 @@ export default function InitialValidation({token}: Props) {
 			errors.push('Project has parent item - only root-level projects can be migrated');
 		}
 
-		// Check 4: Subtask relation must not have has_more: true
+		// Check 4: Validate subtask relations (now supports pagination)
 		const subtaskRelation = properties['Subtask'] as any;
-		if (subtaskRelation?.has_more) {
-			errors.push('Project has too many subtasks (pagination limit exceeded)');
+		if (subtaskRelation && subtaskRelation.relation && subtaskRelation.relation.length > 0) {
+			// If has_more is true, we now handle this properly with pagination
+			if (subtaskRelation.has_more) {
+				// We can handle this now, but let's verify we can retrieve all subtasks
+				const subtaskResult = await getAllRelationIds(client, project.id, 'Subtask');
+				if (!subtaskResult.success) {
+					errors.push(`Failed to retrieve all subtasks: ${subtaskResult.error}`);
+				}
+				// Note: No longer treating has_more as an error since we can handle pagination
+			}
 		}
 
 		// If validation failed, set migration status to Error
