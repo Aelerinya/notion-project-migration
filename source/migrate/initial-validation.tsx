@@ -110,14 +110,14 @@ export default function InitialValidation({token}: Props) {
 
 		// Check 1: Status must be "Done" or "Cancelled"
 		const status = properties.Status?.status?.name;
-		if (status !== 'Done' && status !== 'Cancelled') {
-			errors.push(`Status is "${status}" but must be "Done" or "Cancelled"`);
+		if (status !== 'Done' && status !== 'Cancelled' && status !== 'Ongoing') {
+			errors.push(`Status is "${status}" but must be "Done", "Cancelled" or "Ongoing"`);
 		}
 
 		// Check 2: Must be a Project type
 		const taskProjectActivity = properties['Task/project/activity']?.select?.name;
-		if (taskProjectActivity !== 'Project') {
-			errors.push(`Task/project/activity is "${taskProjectActivity}" but must be "Project"`);
+		if (taskProjectActivity !== 'Project' && taskProjectActivity !== 'Activity') {
+			errors.push(`Task/project/activity is "${taskProjectActivity}" but must be one of "Project" or "Activity"`);
 		}
 
 		// Check 3: Must have no parent item (root-level project only)
